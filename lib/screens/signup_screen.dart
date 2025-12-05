@@ -14,10 +14,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nameController = TextEditingController();
+  
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String forbiddenSymbols = "@#\$^*()!_+-=/|\\'\"\"'{}[]<>?`~";
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -31,8 +34,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _errorMessage = null;
       });
       final userCredential = await _authService.signUpWithEmailPassword(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+        email: _nameController.text.trim(),
+        password: _nameController.text.trim(),
+        name: _nameController.text.trim(),
       );
       setState(() {
         _isLoading = false;
@@ -63,6 +67,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  bool isNicknameValid(String? value, String forbidden) {
+    if (value == null || value.isEmpty) {
+      return false;
+    }
+    for (int i = 0; i < forbidden.length; i++) {
+      if (value.contains(forbidden[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // Access the current theme
@@ -95,6 +110,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
+                  TextFormField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    decoration: InputDecoration(
+                      labelText: 'Nickname',
+                      hintText: 'Your nickname',
+                      prefixIcon: const Icon(Icons.person),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a valid name';
+                      }
+                      if (!isNicknameValid(value, forbiddenSymbols)){
+                        return 'Symbols \" />\\|^&*(){}\$#@!%+_=- \" not allowed';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,

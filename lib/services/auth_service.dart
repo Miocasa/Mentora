@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -11,16 +12,31 @@ class AuthService {
   User? get currentUser => _firebaseAuth.currentUser;
 
   // Sign Up with Email and Password
-  Future<UserCredential?> signUpWithEmailPassword(
-      String email, String password) async {
+  Future<User?> signUpWithEmailPassword({
+    required String email, 
+    required String password, 
+    required String name, 
+    String? role
+  }) async {
     try {
-      UserCredential userCredential = await _firebaseAuth
-          .createUserWithEmailAndPassword(email: email, password: password);
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      // Handle errors (e.g., email-already-in-use, weak-password)
-      debugPrint("Error during sign up: ${e.message}");
-      return null;
+    UserCredential userCredential = await _firebaseAuth
+        .createUserWithEmailAndPassword(email: email, password: password);
+
+    User? user = userCredential.user;
+    if (user == null) return null;
+
+    await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+      "name": name,
+      "role": role ?? "student",
+      "email": email,
+      "uid": user.uid,
+      "createdAt": FieldValue.serverTimestamp(),
+      "strike": 0,
+    });
+    return user;
+  } catch (e) {
+      debugPrint("SignUp error: $e");
+      rethrow;
     }
   }
 

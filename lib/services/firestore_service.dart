@@ -251,15 +251,15 @@ class FirestoreService {
     final coursesCollection = _db.collection('courses');
 
     // A simple check to avoid adding if data might exist. Consider more robust checks.
-    final QuerySnapshot existingCheck = await coursesCollection.limit(1).get();
-    if (existingCheck.docs.isNotEmpty) {
-      // Check if the existing course has lessons to prevent re-adding
-      var firstCourseData = existingCheck.docs.first.data() as Map<String, dynamic>?;
-      if (firstCourseData != null && (firstCourseData['lessons'] as List?)?.isNotEmpty == true) {
-        debugPrint("Sample courses with lessons likely already exist.");
-        return;
-      }
-    }
+    // final QuerySnapshot existingCheck = await coursesCollection.limit(1).get();
+    // if (existingCheck.docs.isNotEmpty) {
+    //   // Check if the existing course has lessons to prevent re-adding
+    //   var firstCourseData = existingCheck.docs.first.data() as Map<String, dynamic>?;
+    //   if (firstCourseData != null && (firstCourseData['lessons'] as List?)?.isNotEmpty == true) {
+    //     debugPrint("Sample courses with lessons likely already exist.");
+    //     return;
+    //   }
+    // }
 
 
     final List<Course> sampleCourses = [
@@ -270,10 +270,22 @@ class FirestoreService {
         instructorName: 'Ada Lovelace',
         imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Zmx1dHRlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', // Replace with a real placeholder
         lessons: [
-          Lesson(id: 'fb_l1', title: 'Introduction to Flutter', videoUrl: 'https://vkvideo.ru/video-194945663_456239238', order: 1, description: "What is Flutter and why use it?"),
-          Lesson(id: 'fb_l2', title: 'Setting up Your Environment', videoUrl: 'YOUR_GCS_VIDEO_URL_2_HERE', order: 2, description: "Install Flutter and configure your IDE."),
-          Lesson(id: 'fb_l3', title: 'Your First Flutter App', videoUrl: 'YOUR_GCS_VIDEO_URL_3_HERE', order: 3, description: "Hello World in Flutter: Understanding the main.dart file."),
-          Lesson(id: 'fb_l4', title: 'Basic Widgets', videoUrl: 'YOUR_GCS_VIDEO_URL_4_HERE', order: 4, description: "Exploring Text, Container, Row, Column."),
+          Lesson(id: 'fb_l1', title: 'Introduction to Flutter', videoUrl: 'https://vkvideo.ru/video-194945663_456239238', order: 1, description: "What is Flutter and why use it?", textLessonMd: ""),
+          Lesson(id: 'fb_l2', title: 'Setting up Your Environment', videoUrl: 'YOUR_GCS_VIDEO_URL_2_HERE', order: 2, description: "Install Flutter and configure your IDE.", textLessonMd: ""),
+          Lesson(id: 'fb_l3', title: 'Your First Flutter App', videoUrl: 'YOUR_GCS_VIDEO_URL_3_HERE', order: 3, description: "Hello World in Flutter: Understanding the main.dart file.", textLessonMd: ""),
+          Lesson(id: 'fb_l4', title: 'Basic Widgets', videoUrl: 'YOUR_GCS_VIDEO_URL_4_HERE', order: 4, description: "Exploring Text, Container, Row, Column.", textLessonMd: ""),
+        ],
+      ),
+      Course(
+        id: 'deserts_cooking_003',
+        title: 'Cook with Sanji',
+        description: 'Cource for peeple that interested how to cook Milk',
+        instructorName: 'KingChris',
+        imageUrl: 'https://i.imgur.com/UBZ7p91.jpeg&auto=format&fit=crop&w=500&q=60',
+        lessons: [
+          Lesson(id: 'dc_l1', title: 'What is milk', videoUrl: 'YOUR_GCS_VIDEO_URL_8_HERE', order: 1, description: "Milk definition, witch types of milk exist and everything you need to start cook."),
+          Lesson(id: 'dc_l2', title: 'Eden Wuffels', videoUrl: 'YOUR_GCS_VIDEO_URL_9_HERE', order: 2, description: "PlaceHolder"),
+          Lesson(id: 'dc_l3', title: 'PlaceHolder', videoUrl: 'YOUR_GCS_VIDEO_URL_10_HERE', order: 3, description: "PlaceHolder"),
         ],
       ),
       Course(
@@ -288,15 +300,36 @@ class FirestoreService {
           Lesson(id: 'dd_l3', title: 'Error Handling in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions."),
         ],
       ),
-     
+      Course(
+        id: 'cpp_deep_dive_004',
+        title: 'Advanced C++ Programming',
+        description: 'Master the C++ language for cli apps. Dive into asynchronous programming, streams, and more.',
+        instructorName: 'Edureka',
+        imageUrl: 'https://i.imgur.com/JztWcE7.png&auto=format&fit=crop&w=500&q=60', // Replace
+        lessons: [
+          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding asyncronic programming."),
+          Lesson(id: 'dd_l2', title: 'Types in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data."),
+          Lesson(id: 'dd_l3', title: 'Error Handling in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions."),
+        ],
+      ),
     ];
 
     WriteBatch batch = _db.batch();
     for (var course in sampleCourses) {
       DocumentReference courseRef = coursesCollection.doc(course.id);
-      batch.set(courseRef, course.toMap());
+      // merge: true — обновит существующий документ или создаст новый
+      batch.set(courseRef, course.toMap(), SetOptions(merge: true));
     }
     await batch.commit();
     debugPrint("Added/Updated sample courses with lessons to Firestore.");
+
+
+    // WriteBatch batch = _db.batch();
+    // for (var course in sampleCourses) {
+    //   DocumentReference courseRef = coursesCollection.doc(course.id);
+    //   batch.set(courseRef, course.toMap());
+    // }
+    // await batch.commit();
+    // debugPrint("Added/Updated sample courses with lessons to Firestore.");
   }
 }

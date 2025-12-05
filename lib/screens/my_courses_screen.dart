@@ -1,11 +1,9 @@
 // lib/screens/my_courses_screen.dart (New File)
-import 'package:course/models/course.dart';
 import 'package:course/screens/course_detail_screen.dart';
 import 'package:course/services/auth_service.dart';
 import 'package:course/services/firestore_service.dart';
 import 'package:course/widgets/course_card.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 
 class MyCoursesScreen extends StatefulWidget {
@@ -26,19 +24,18 @@ class _MyCoursesScreenState extends State<MyCoursesScreen> {
 
 
     if (user == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('My Courses')),
-        body: const Center(
+      // return Scaffold(
+      //   // appBar: AppBar(title: const Text('My Courses')),
+      //   body: const Center(
+      //     child: Text('Please log in to see your courses.'),
+      //   ),
+      // );
+      return const Center(
           child: Text('Please log in to see your courses.'),
-        ),
       );
     }
 
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('My Learning'),
-      // ),
-      body: StreamBuilder<List<MyCourseInfo>>(
+    return StreamBuilder<List<MyCourseInfo>>(
         stream: _firestoreService.getMyCoursesWithProgress(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -84,7 +81,6 @@ class _MyCoursesScreenState extends State<MyCoursesScreen> {
             },
           );
         },
-      ),
-    );
+      );
   }
 }

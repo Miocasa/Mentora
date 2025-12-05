@@ -2,6 +2,7 @@ import 'package:course/models/course.dart';
 import 'package:course/screens/course_detail_screen.dart';
 import 'package:course/screens/my_courses_screen.dart';
 import 'package:course/screens/settings_screen.dart';
+import 'package:course/screens/user_profile_screen.dart';
 import 'package:course/services/auth_service.dart';
 import 'package:course/services/firestore_service.dart';
 import 'package:course/widgets/course_card.dart';
@@ -209,11 +210,11 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: "Search Courses",
             onPressed: _startSearch,
           ),
-          IconButton(
-            icon: const Icon(Icons.cast_for_education_outlined),
-            tooltip: "My Learning",
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyCoursesScreen())),
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.cast_for_education_outlined),
+          //   tooltip: "My Learning",
+          //   onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyCoursesScreen())),
+          // ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: "Settings",
@@ -230,6 +231,8 @@ class _HomeScreenState extends State<HomeScreen> {
     (icon: Icons.favorite_border, selectedIcon: Icons.favorite,    label: 'Мои курсы'),
     (icon: Icons.person_outline,  selectedIcon: Icons.person,      label: 'Профиль'),
   ];
+  
+  
 
   int _selectedIndex = 0;
 
@@ -243,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Builder(builder: (_) => _buildBody()), // main page
           Builder(builder: (_) => MyCoursesScreen()), // my cources
-          Builder(builder: (_) => _buildBody()), // profile page
+          Builder(builder: (_) => UserProfileScreen()), // profile page
         ],
       ),
       // body: _buildBody(), // _buildBody remains the same
@@ -262,13 +265,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }).toList(),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () async {
-      //     await FirestoreService().enrollInCourse('cpp_for_newbies_003');
-      //     print('Принудительно записались на C++ курс');
-      //   },
-      //   child: Icon(Icons.add),
-      // ),
       floatingActionButton: _isSearching ? null : FloatingActionButton.extended( // Hide FAB when searching
         onPressed: () async {
           await _firestoreService.addSampleCoursesWithLessons();
