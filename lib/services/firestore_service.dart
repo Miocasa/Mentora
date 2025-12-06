@@ -301,51 +301,18 @@ class FirestoreService {
     final List<Course> sampleCourses = [
       Course(
         id: 'flutter_basics_001', // Using specific IDs for sample data
-        title: 'Flutter for Absolute Beginners',
-        description: 'Your first step into mobile app development with Flutter. Covers widgets, layouts, and state management basics.',
+        title: '🚀 Flutter с нуля до профи 🛠',
+        description: 'В ходе курса, мы вместе разберемся с тем, что такое Flutter и как на нем сделать первое приложение.',
         instructorName: 'Ada Lovelace',
         imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Zmx1dHRlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', // Replace with a real placeholder
         lessons: [
-          Lesson(id: 'fb_l1', title: 'Introduction to Flutter', videoUrl: 'https://vkvideo.ru/video-194945663_456239238', order: 1, description: "What is Flutter and why use it?", markdownUrl: ""),
-          Lesson(id: 'fb_l2', title: 'Setting up Your Environment', videoUrl: 'YOUR_GCS_VIDEO_URL_2_HERE', order: 2, description: "Install Flutter and configure your IDE.", markdownUrl: ""),
-          Lesson(id: 'fb_l3', title: 'Your First Flutter App', videoUrl: 'YOUR_GCS_VIDEO_URL_3_HERE', order: 3, description: "Hello World in Flutter: Understanding the main.dart file.", markdownUrl: ""),
-          Lesson(id: 'fb_l4', title: 'Basic Widgets', videoUrl: 'YOUR_GCS_VIDEO_URL_4_HERE', order: 4, description: "Exploring Text, Container, Row, Column.", markdownUrl: ""),
-        ],
-      ),
-      Course(
-        id: 'deserts_cooking_003',
-        title: 'Cook with Sanji',
-        description: 'Cource for peeple that interested how to cook Milk',
-        instructorName: 'KingChris',
-        imageUrl: 'https://i.imgur.com/UBZ7p91.jpeg&auto=format&fit=crop&w=500&q=60',
-        lessons: [
-          Lesson(id: 'dc_l1', title: 'What is milk', videoUrl: 'YOUR_GCS_VIDEO_URL_8_HERE', order: 1, description: "Milk definition, witch types of milk exist and everything you need to start cook.", markdownUrl: ""),
-          Lesson(id: 'dc_l2', title: 'Eden Wuffels', videoUrl: 'YOUR_GCS_VIDEO_URL_9_HERE', order: 2, description: "PlaceHolder", markdownUrl: ""),
-          Lesson(id: 'dc_l3', title: 'PlaceHolder', videoUrl: 'YOUR_GCS_VIDEO_URL_10_HERE', order: 3, description: "PlaceHolder", markdownUrl: ""),
-        ],
-      ),
-      Course(
-        id: 'dart_deep_dive_002',
-        title: 'Advanced Dart Programming',
-        description: 'Master the Dart language for powerful Flutter apps. Dive into asynchronous programming, streams, and more.',
-        instructorName: 'Charles Babbage',
-        imageUrl: 'https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8ZGFydCUyMHByb2dyYW1taW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60', // Replace
-        lessons: [
-          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding async, await, and Future objects.", markdownUrl: ""),
-          Lesson(id: 'dd_l2', title: 'Streams in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data.", markdownUrl: ""),
-          Lesson(id: 'dd_l3', title: 'Error Handling in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions.", markdownUrl: ""),
-        ],
-      ),
-      Course(
-        id: 'cpp_deep_dive_004',
-        title: 'Advanced C++ Programming',
-        description: 'Master the C++ language for cli apps. Dive into asynchronous programming, streams, and more.',
-        instructorName: 'Edureka',
-        imageUrl: 'https://i.imgur.com/JztWcE7.png&auto=format&fit=crop&w=500&q=60', // Replace
-        lessons: [
-          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding asyncronic programming.", markdownUrl: ""),
-          Lesson(id: 'dd_l2', title: 'Types in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data.", markdownUrl: ""),
-          Lesson(id: 'dd_l3', title: 'Error Handling in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions.", markdownUrl: ""),
+          Lesson(id: 'fb_l1', title: 'Введение', videoUrl: 'https://www.youtube.com/watch?v=FI-VshKxDZ0&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=1&pp=iAQB', order: 1, description: "Почему Flutter — лучший выбор в 2025 году, обзор курса", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043958/lesson1_zditxn.md"),
+          Lesson(id: 'fb_l2', title: 'Установка и запуск первого приложения', videoUrl: 'https://www.youtube.com/watch?v=SZDF1Y1K1UE&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=2&pp=iAQB', order: 2, description: "Полная установка на Windows/macOS/Linux, flutter doctor, первое приложение", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043958/lesson2_pprqd1.md"),
+          Lesson(id: 'fb_l3', title: 'Основные виджеты: Stateful vs Stateless, Scaffold', videoUrl: 'https://www.youtube.com/watch?v=6zrgNEDpwMo&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=3&pp=iAQB', order: 3, description: "Разница между Stateless и Stateful, структура MaterialApp", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043958/lesson3_owoz6v.md"),
+          Lesson(id: 'fb_l4', title: 'Верстка, работа с темой, установка пакетов', videoUrl: 'https://www.youtube.com/watch?v=QN6f3AmoMOE&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=4&pp=iAQB', order: 4, description: "Container, Row/Column, темы, google_fonts, красивые карточки", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson4_ylj410.md"),
+          Lesson(id: 'fb_l5', title: 'Навигация: Navigator, Named Routes, go_router', videoUrl: 'https://www.youtube.com/watch?v=C8Qbk9PQR7M&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=5&t=6s&pp=iAQB', order: 5, description: "Современная навигация с go_router, переходы с анимацией", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson5_awfyds.md"),
+          Lesson(id: 'fb_l6', title: 'Архитектура проекта, рефакторинг, декомпозиция', videoUrl: 'https://www.youtube.com/watch?v=B911Fi5UwwI&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=6&pp=iAQB', order: 6, description: "Feature-first структура, чистый код, разделение ответственностей", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson6_hyjkbo.md"),
+          Lesson(id: 'fb_l7', title: 'Работа с API, http и Dio', videoUrl: 'https://www.youtube.com/watch?v=aT4hddCYSX4&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=7&pp=iAQB0gcJCRUKAYcqIYzv', order: 7, description: "Dio + retrofit + интерсепторы, обработка ошибок, кэширование", markdownUrl: "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson7_p0mvka.md"),
         ],
       ),
     ];
