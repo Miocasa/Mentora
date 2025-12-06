@@ -2,7 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:course/models/course.dart';
 import 'package:course/models/lesson.dart';
 import 'package:course/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+class UserProfile {
+  final String name;
+  final String email;
+  final String role;
+  final int streak;
+
+  UserProfile({
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.streak,
+  });
+}
 
 // --- Enrollment Details Model ---
 class EnrollmentDetails {
@@ -71,17 +86,38 @@ class FirestoreService {
   // --- Course Functions ---
   Stream<List<Course>> getCourses() {
     return _db.collection('courses').snapshots().map((snapshot) => snapshot.docs
-        .map((doc) => Course.fromMap(doc.data(), doc.id))
-        .toList());
-    // for(int i = 0; i < sampleCourses ;)
-    // Stream<List<Course>> courses = Course(description: '',
-    //  id: '',
-    //  title: '',
-    //  instructorName: '',
-    //  imageUrl: '') as Stream<List<Course>>;
-    // courses = sampleCourses[0];
-    // return courses;
-    
+      .map((doc) => Course.fromMap(doc.data(), doc.id))
+      .toList());
+  }
+
+  Future<UserProfile> getUserProfile(User user) async {
+    final doc = await _db.collection('users').doc(user.uid).get();
+
+    // если документа нет — возвращаем дефолтные значения
+    if (!doc.exists) {
+      final String email = user.email ?? '?';
+      return UserProfile(
+        name: 'Имя не задано',
+        email: email,
+        role: 'student',
+        streak: 0,
+      );
+    }
+
+    final data = doc.data() ?? {};
+
+    final String email = (data['email'] ?? user.email ?? '?') as String;
+    final String name = (data['name'] ?? 'Имя не задано') as String;
+    final String role = (data['role'] ?? 'student') as String;
+    // strike / streak
+    final int streak = (data['strike'] ?? data['streak'] ?? 0) as int;
+
+    return UserProfile(
+      name: name,
+      email: email,
+      role: role,
+      streak: streak,
+    );
   }
 
   Future<Course?> getCourseById(String courseId) async {
@@ -270,10 +306,10 @@ class FirestoreService {
         instructorName: 'Ada Lovelace',
         imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Zmx1dHRlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', // Replace with a real placeholder
         lessons: [
-          Lesson(id: 'fb_l1', title: 'Introduction to Flutter', videoUrl: 'https://vkvideo.ru/video-194945663_456239238', order: 1, description: "What is Flutter and why use it?", textLessonMd: ""),
-          Lesson(id: 'fb_l2', title: 'Setting up Your Environment', videoUrl: 'YOUR_GCS_VIDEO_URL_2_HERE', order: 2, description: "Install Flutter and configure your IDE.", textLessonMd: ""),
-          Lesson(id: 'fb_l3', title: 'Your First Flutter App', videoUrl: 'YOUR_GCS_VIDEO_URL_3_HERE', order: 3, description: "Hello World in Flutter: Understanding the main.dart file.", textLessonMd: ""),
-          Lesson(id: 'fb_l4', title: 'Basic Widgets', videoUrl: 'YOUR_GCS_VIDEO_URL_4_HERE', order: 4, description: "Exploring Text, Container, Row, Column.", textLessonMd: ""),
+          Lesson(id: 'fb_l1', title: 'Introduction to Flutter', videoUrl: 'https://vkvideo.ru/video-194945663_456239238', order: 1, description: "What is Flutter and why use it?", markdownUrl: ""),
+          Lesson(id: 'fb_l2', title: 'Setting up Your Environment', videoUrl: 'YOUR_GCS_VIDEO_URL_2_HERE', order: 2, description: "Install Flutter and configure your IDE.", markdownUrl: ""),
+          Lesson(id: 'fb_l3', title: 'Your First Flutter App', videoUrl: 'YOUR_GCS_VIDEO_URL_3_HERE', order: 3, description: "Hello World in Flutter: Understanding the main.dart file.", markdownUrl: ""),
+          Lesson(id: 'fb_l4', title: 'Basic Widgets', videoUrl: 'YOUR_GCS_VIDEO_URL_4_HERE', order: 4, description: "Exploring Text, Container, Row, Column.", markdownUrl: ""),
         ],
       ),
       Course(
@@ -283,9 +319,9 @@ class FirestoreService {
         instructorName: 'KingChris',
         imageUrl: 'https://i.imgur.com/UBZ7p91.jpeg&auto=format&fit=crop&w=500&q=60',
         lessons: [
-          Lesson(id: 'dc_l1', title: 'What is milk', videoUrl: 'YOUR_GCS_VIDEO_URL_8_HERE', order: 1, description: "Milk definition, witch types of milk exist and everything you need to start cook."),
-          Lesson(id: 'dc_l2', title: 'Eden Wuffels', videoUrl: 'YOUR_GCS_VIDEO_URL_9_HERE', order: 2, description: "PlaceHolder"),
-          Lesson(id: 'dc_l3', title: 'PlaceHolder', videoUrl: 'YOUR_GCS_VIDEO_URL_10_HERE', order: 3, description: "PlaceHolder"),
+          Lesson(id: 'dc_l1', title: 'What is milk', videoUrl: 'YOUR_GCS_VIDEO_URL_8_HERE', order: 1, description: "Milk definition, witch types of milk exist and everything you need to start cook.", markdownUrl: ""),
+          Lesson(id: 'dc_l2', title: 'Eden Wuffels', videoUrl: 'YOUR_GCS_VIDEO_URL_9_HERE', order: 2, description: "PlaceHolder", markdownUrl: ""),
+          Lesson(id: 'dc_l3', title: 'PlaceHolder', videoUrl: 'YOUR_GCS_VIDEO_URL_10_HERE', order: 3, description: "PlaceHolder", markdownUrl: ""),
         ],
       ),
       Course(
@@ -295,9 +331,9 @@ class FirestoreService {
         instructorName: 'Charles Babbage',
         imageUrl: 'https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8ZGFydCUyMHByb2dyYW1taW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60', // Replace
         lessons: [
-          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding async, await, and Future objects."),
-          Lesson(id: 'dd_l2', title: 'Streams in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data."),
-          Lesson(id: 'dd_l3', title: 'Error Handling in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions."),
+          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding async, await, and Future objects.", markdownUrl: ""),
+          Lesson(id: 'dd_l2', title: 'Streams in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data.", markdownUrl: ""),
+          Lesson(id: 'dd_l3', title: 'Error Handling in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions.", markdownUrl: ""),
         ],
       ),
       Course(
@@ -307,9 +343,9 @@ class FirestoreService {
         instructorName: 'Edureka',
         imageUrl: 'https://i.imgur.com/JztWcE7.png&auto=format&fit=crop&w=500&q=60', // Replace
         lessons: [
-          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding asyncronic programming."),
-          Lesson(id: 'dd_l2', title: 'Types in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data."),
-          Lesson(id: 'dd_l3', title: 'Error Handling in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions."),
+          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding asyncronic programming.", markdownUrl: ""),
+          Lesson(id: 'dd_l2', title: 'Types in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data.", markdownUrl: ""),
+          Lesson(id: 'dd_l3', title: 'Error Handling in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions.", markdownUrl: ""),
         ],
       ),
     ];

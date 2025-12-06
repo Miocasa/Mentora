@@ -8,6 +8,7 @@ import 'package:course/services/firestore_service.dart';
 import 'package:course/widgets/course_card.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // For Debouncer
+import 'package:markdown_widget/markdown_widget.dart';
 
 // Debouncer class (keep as is)
 class Debouncer {
@@ -23,14 +24,14 @@ class Debouncer {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MainScreenState extends State<MainScreen> {
   final AuthService _authService = AuthService();
   final FirestoreService _firestoreService = FirestoreService();
   final TextEditingController _searchController = TextEditingController();
@@ -172,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: InputDecoration(
         hintText: 'Search courses...',
         border: InputBorder.none,
-        hintStyle: TextStyle(color: Theme.of(context).hintColor.withOpacity(0.8)),
+        hintStyle: TextStyle(color: Theme.of(context).hintColor.withAlpha((252*0.8).toInt())),
       ),
       style: TextStyle(
         color: Theme.of(context).appBarTheme.foregroundColor ?? Theme.of(context).colorScheme.onSurface,
@@ -227,25 +228,26 @@ class _HomeScreenState extends State<HomeScreen> {
   
   final List<({IconData icon, IconData selectedIcon, String label})> _destinations = [
     (icon: Icons.home_outlined,   selectedIcon: Icons.home,        label: 'Главная'),
-    // (icon: Icons.search_outlined, selectedIcon: Icons.search,      label: 'Поиск'),
+    // (icon: Icons.search_outlined, selectedIcon: Icons.storefront,      label: 'Каталог'),
     (icon: Icons.favorite_border, selectedIcon: Icons.favorite,    label: 'Мои курсы'),
     (icon: Icons.person_outline,  selectedIcon: Icons.person,      label: 'Профиль'),
   ];
   
   
-
+  
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("--- HomeScreen BUILD METHOD CALLED --- (Query: $_searchQuery, IsSearching: $_isSearching)");
+    debugPrint("--- MainScreen BUILD METHOD CALLED --- (Query: $_searchQuery, IsSearching: $_isSearching)");
     return Scaffold(
       appBar: _buildAppBar(context),
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          Builder(builder: (_) => _buildBody()), // main page
-          Builder(builder: (_) => MyCoursesScreen()), // my cources
+          // Builder(builder: (_) => MainBodyScreen()),    // main page
+          Builder(builder: (_) => _buildStore()),       // store screen
+          Builder(builder: (_) => MyCoursesScreen()),   // my cources
           Builder(builder: (_) => UserProfileScreen()), // profile page
         ],
       ),
@@ -265,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }).toList(),
       ),
-      floatingActionButton: _isSearching ? null : FloatingActionButton.extended( // Hide FAB when searching
+      floatingActionButton: _isSearching || _selectedIndex != 0  ? null : FloatingActionButton.extended( // Hide FAB when searching
         onPressed: () async {
           await _firestoreService.addSampleCoursesWithLessons();
           if (mounted) {
@@ -280,8 +282,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildBody() {
-    // ... (keep _buildBody as is, it already uses _filteredCourses)
+  Widget _buildStore() {
+    // ... (keep _buildStore as is, it already uses _filteredCourses)
     if (_isLoadingCourses) {
       return const Center(child: CircularProgressIndicator(key: Key("all_courses_loading")));
     }
@@ -326,3 +328,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

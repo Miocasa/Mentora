@@ -3,7 +3,7 @@ class Lesson {
   final String title;
   final String description; // Optional: a brief description of the lesson
   final String? videoUrl;
-  final String? textLessonMd;
+  final String? markdownUrl;
   final String? textMarkdown;
   final int order; // To maintain lesson sequence
 
@@ -12,7 +12,7 @@ class Lesson {
     required this.title,
     this.description = '',
     this.videoUrl,
-    this.textLessonMd,
+    this.markdownUrl,
     this.textMarkdown,
     required this.order,
   });
@@ -24,7 +24,7 @@ class Lesson {
       title: map['title'] ?? 'Untitled Lesson',
       description: map['description'] ?? '',
       videoUrl: map['videoUrl'] ?? '',
-      textLessonMd: map['textLessonMd'] ?? '',
+      markdownUrl: map['markdownUrl'] ?? '',
       order: map['order'] ?? 0,
     );
   }
@@ -35,6 +35,7 @@ class Lesson {
       'title': title,
       'description': description,
       'videoUrl': videoUrl,
+      'markdownUrl': markdownUrl,
       'order': order,
     };
   }

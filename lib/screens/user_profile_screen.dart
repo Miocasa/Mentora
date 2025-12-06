@@ -1,29 +1,9 @@
-// lib/screens/my_courses_screen.dart (New File)
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:course/screens/course_detail_screen.dart';
-import 'package:course/services/auth_service.dart';
+import 'package:course/customWidgets/progressbar.dart';
 import 'package:course/services/firestore_service.dart';
-import 'package:course/widgets/course_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-
-// class UserProfileScreen {
-//   const UserProfileScreen({
-//     required this.uid,
-//     required this.name,
-//     required this.email,
-//     this.role,
-//     this.streak,
-//   });
-//   final String uid;
-//   final String email;
-//   final String? name;
-//   final String? role;
-//   final int? streak;
-
-
-// }
+import 'dart:math' as math;
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -34,144 +14,243 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   final FirestoreService _firestoreService = FirestoreService();
-  final AuthService _authService = AuthService(); // Or get from Provider
-
-  // final FirebaseFirestore _db = FirebaseFirestore.instance;
-  
-  int? outInt(){} // placeholders
-  String? out(){} // placeholders
 
   @override
   Widget build(BuildContext context) {
-    // final user = Provider.of<User?>(context); // Example if using Provider for user
-    final user = _authService.currentUser;
-    FirebaseAuth.instance.currentUser?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
 
-    final String _email = FirebaseAuth.instance.currentUser?.email ?? '?';
-    final String? _name = out();
-    final String? _role = out();
-    final int? _streak = outInt();
-
-
+    // User is not authenticated
     if (user == null) {
-      const Center(
-          child: Text('Please log in to see your profile.'),
+      return const Scaffold(
+        body: Center(
+          child: Text('Пожалуйста, войдите, чтобы увидеть профиль.'),
+        ),
       );
     }
 
-    return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar( // avatar from first letter of name or email
-              radius: 40,
-              child:Text(
-                _name != null ? _name[0].toUpperCase() : _email[0].toUpperCase(),
-                style: const TextStyle(fontSize: 32),
-              ),
+    return FutureBuilder<UserProfile>(
+      future: _firestoreService.getUserProfile(user), // Correct instance call
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text('Ошибка загрузки профиля: ${snapshot.error}'),
             ),
-            const SizedBox(height: 16),
+          );
+        }
 
-            Text(
-              _name ?? 'name not setted',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: Text('Профиль не найден.')),
+          );
+        }
 
-            Text(
-              _email,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.grey[600]),
-            ),
+        final profile = snapshot.data!;
+        final String name = profile.name;
+        final String email = profile.email;
+        final String role = profile.role;
+        final int streak = profile.streak;
 
-            const SizedBox(height: 16),
-
-            // if (_role != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.badge_outlined),
-                  const SizedBox(width: 8),
-                  Text('Role: ${_role ?? 'not found'}'),
-                ],
-              ),
-
-            // if (_streak != null) 
-              ...[
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.local_fire_department_outlined),
-                  const SizedBox(width: 8),
-                  Text('Strick: ${_streak} days'),
-                ],
-              ),
-            ],
-
-            const SizedBox(height: 24),
-
-            FilledButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Редактирование пока не реализовано')),
-                );
-              },
-              icon: const Icon(Icons.edit),
-              label: const Text('Редактировать профиль'),
-            ),
-          ],
-        ),
-      );
+        return _buildProfileView(
+          context,
+          name: name,
+          email: email,
+          role: role,
+          streak: streak,
+        );
+      },
+    );
   }
 
-  
-  // Widget _buildBody() {
-  //   // ... (keep _buildBody as is, it already uses _filteredCourses)
-  //   if (_isLoadingCourses) {
-  //     return const Center(child: CircularProgressIndicator(key: Key("all_courses_loading")));
-  //   }
+  Widget _buildProfileView(
+  BuildContext context, {
+  required String name,
+  required String email,
+  required String role,
+  required int streak,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    int outerProgress = streak;
+    int innerProgress = streak+2;
 
-  //   if (_allCourses.isEmpty && !_isLoadingCourses) {
-  //     return const Center(child: Text('No courses available. Try adding sample data.'));
-  //   }
+    int otherProgressGoal = 5;
+    int innerProgressGoal = 25;
+    final outerTarget = (outerProgress / otherProgressGoal).clamp(0.0, 1.0);
+    final innerTarget = (innerProgress / innerProgressGoal).clamp(0.0, 1.0);
 
-  //   if (_searchQuery.isNotEmpty && _filteredCourses.isEmpty) {
-  //     return Center(
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           const Icon(Icons.search_off_rounded, size: 60, color: Colors.grey),
-  //           const SizedBox(height: 16),
-  //           Text('No courses found for "$_searchQuery".', style: const TextStyle(fontSize: 16)),
-  //           const SizedBox(height: 8),
-  //           Text('Try a different search term.', style: TextStyle(color: Colors.grey.shade600)),
-  //         ],
-  //       ),
-  //     );
-  //   }
+    return Scaffold(
+      body:  SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
+        child: Column(
+          children: [
+          // Заголовочная карточка с аватаром и основной информацией
+          Center(child: Card(
+            elevation: 0,
+            color: colorScheme.surfaceContainerLow,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+              child: Column(
+                children: [
+                  // Аватар с акцентным фоном
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: colorScheme.primaryContainer,
+                    child: Text(
+                      (name.isNotEmpty ? name[0] : email[0]).toUpperCase(),
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
 
-  //   return ListView.builder(
-  //     padding: const EdgeInsets.all(8.0),
-  //     itemCount: _filteredCourses.length,
-  //     itemBuilder: (context, index) {
-  //       final course = _filteredCourses[index];
-  //       return CourseCard(
-  //         course: course,
-  //         enrollmentDetails: _enrolledDetailsMap[course.id],
-  //         onTap: () {
-  //           FocusScope.of(context).unfocus(); // Hide keyboard
-  //           if (_isSearching) _stopSearch(); // Optionally close search on tap
-  //           Navigator.push(
-  //             context,
-  //             MaterialPageRoute(builder: (context) => CourseDetailScreen(courseId: course.id)),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
+                  const SizedBox(height: 20),
+
+                  Text(
+                    name.isNotEmpty ? name : 'Имя не задано',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    email,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Роль и стрик в стиле "чипов"
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.badge_outlined, size: 18, color: colorScheme.primary),
+                        label: Text(role),
+                        backgroundColor: colorScheme.primaryContainer,
+                        labelStyle: TextStyle(color: colorScheme.onPrimaryContainer),
+                      ),
+                      Chip(
+                        avatar: Icon(
+                          Icons.local_fire_department,
+                          size: 20,
+                          color: streak > 0 
+                          ? Colors.orange.shade700 
+                          : colorScheme.outline,
+                        ),
+                        label: Text('$streak ${streak == 1 ? 'day' : 'дня'} стрик'),
+                        backgroundColor: streak > 0 
+                            ? ( Colors.orange.shade50 )
+                            : colorScheme.surfaceContainerHighest,
+                        labelStyle: TextStyle(
+                          color: streak > 0 ? Colors.orange.shade900 : colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TweenAnimationBuilder<double>(
+            key: ValueKey(outerProgress), // перезапуск анимации при изменении
+            duration: const Duration(milliseconds: 500),
+            tween: Tween<double>(begin: 0, end: 1), // t: 0 → 1
+            builder: (context, t, _) {
+              return AnimatedProgressIndicator(
+                progress: outerTarget * t,    // внешнее кольцо
+                innerProgress: innerTarget * t, // внутреннее кольцо
+                label: '$outerProgress',
+                subLabel: 'За неделю $innerProgress',
+                size: 270,
+                strokeWidth: 16,
+                innerStrokeWidth: 14,
+                outerColor: Colors.green,
+                innerColor: Colors.amber,
+              );
+            },
+          ),
+          const SizedBox(height: 32),
+          Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.star, size: 24, color: Colors.green),
+                const SizedBox(width: 2),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text("Очки", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    // Text("Очков"),
+                  ],
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 24, color: Colors.amber),
+                const SizedBox(width: 2),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text("Дни", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    // Text("Стрика"),
+                  ],
+                ),
+              ],
+            ),
+            
+          ],
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Вы почти достигли цели 👍',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 18
+            ),
+          ),
+            const SizedBox(height: 100),
+        ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton( // Hide FAB when searching
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Редактирование профиля скоро будет доступно'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        child: Icon(Icons.edit_outlined),
+        // label: const Text('Редактировать'), // edit
+        // icon: const Icon(Icons.edit_outlined),
+      ),
+    );
+  }
 }
+
+
