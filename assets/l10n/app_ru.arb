@@ -27,7 +27,7 @@
   "signUpNicknameLabel": "Никнейм",
   "signUpNicknameHint": "Ваш никнейм",
   "signUpNicknameErrorEmpty": "Пожалуйста, введите корректное имя",
-  "signUpNicknameErrorSymbols": "Символы \" />\\|^&*(){{}}$#@!%+_=- \" не допускаются",
+  
   "signUpEmailLabel": "Email",
   "signUpEmailHint": "you@example.com",
   "signUpEmailError": "Пожалуйста, введите корректный email",

@@ -27,7 +27,7 @@
   "signUpNicknameLabel": "Nickname",
   "signUpNicknameHint": "Your nickname",
   "signUpNicknameErrorEmpty": "Please enter a valid name",
-  "signUpNicknameErrorSymbols": "Symbols \\\" />\\\\|^&*(){}\\$#@!%+_=- \\\" not allowed",
+  
   "signUpEmailLabel": "Email",
   "signUpEmailHint": "you@example.com",
   "signUpEmailError": "Please enter a valid email",
