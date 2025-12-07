@@ -6,6 +6,9 @@ import 'package:course/services/auth_service.dart';
 import 'package:course/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:course/generated/app_localizations.dart';
+
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -27,14 +30,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     EnrollmentDetails? enrollment,
     bool isEffectivelyEnrolled,
   ) {
-    if (!isEffectivelyEnrolled /* && !course.isPubliclyViewable */) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enroll to watch this lesson.'),
-        ),
-      );
-      return;
-    }
+    if (!isEffectivelyEnrolled) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(AppLocalizations.of(context)!.coursePleaseEnrollToWatchLesson),
+    ),
+  );
+  return;
+}
 
     Navigator.push(
       context,
@@ -69,14 +72,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     EnrollmentDetails? enrollment,
     bool isEffectivelyEnrolled,
   ) {
-    if (!isEffectivelyEnrolled /* && !course.isPubliclyViewable */) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enroll to view lesson content.'),
-        ),
-      );
-      return;
-    }
+    if (!isEffectivelyEnrolled) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(AppLocalizations.of(context)!.coursePleaseEnrollToViewContent),
+    ),
+  );
+  return;
+}
 
     Navigator.push(
       context,
@@ -116,7 +119,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             if (snapshot.connectionState == ConnectionState.waiting ||
                 !snapshot.hasData ||
                 snapshot.data == null) {
-              return const Text('Loading...');
+              return Text(AppLocalizations.of(context)!.courseLoading);
             }
             return Text(snapshot.data!.title);
           },
@@ -131,8 +134,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           if (courseSnapshot.hasError ||
               !courseSnapshot.hasData ||
               courseSnapshot.data == null) {
-            return const Center(
-              child: Text('Course not found or error loading.'),
+            return Center(
+              child: Text(AppLocalizations.of(context)!.courseNotFound),
             );
           }
 
@@ -160,7 +163,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
               double progressPercent = 0.0;
               if (isEffectivelyEnrolled) {
-                progressPercent = enrollment!.progressPercentage;
+                progressPercent = enrollment.progressPercentage;
               }
 
               // 🟢 СПИСОК ЗАВЕРШЁННЫХ УРОКОВ ПО ID
@@ -239,7 +242,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Instructor: ${course.instructorName}',
+                      AppLocalizations.of(context)!.courseInstructor(course.instructorName),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 16),
@@ -255,7 +258,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     if (isUserLoggedIn)
                       Column(
                         children: [
-                          if (isEffectivelyEnrolled && enrollment != null)
+                          if (isEffectivelyEnrolled)
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(vertical: 16.0),
@@ -286,21 +289,21 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text(
-                                            'Confirm Unenrollment'),
+                                        title: Text(
+                                            AppLocalizations.of(context)!.courseConfirmUnenrollTitle),
                                         content: Text(
-                                          'Are you sure you want to unenroll from "${course.title}"? Your progress will be lost.',
+                                          AppLocalizations.of(context)!.courseConfirmUnenrollBody(course.title),
                                         ),
                                         actions: <Widget>[
                                           TextButton(
-                                            child: const Text('Cancel'),
+                                            child: Text(AppLocalizations.of(context)!.courseDialogCancel),
                                             onPressed: () =>
                                                 Navigator.of(context)
                                                     .pop(false),
                                           ),
                                           TextButton(
-                                            child: const Text(
-                                              'Unenroll',
+                                            child: Text(
+                                              AppLocalizations.of(context)!.courseDialogUnenroll,
                                               style: TextStyle(
                                                 color: Colors.red,
                                               ),
@@ -319,9 +322,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     if (mounted) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'Successfully unenrolled!',
+                                            AppLocalizations.of(context)!.courseUnenrollSuccess
                                           ),
                                         ),
                                       );
@@ -332,9 +335,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                       .enrollInCourse(widget.courseId);
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content:
-                                            Text('Successfully enrolled!'),
+                                            Text(AppLocalizations.of(context)!.courseEnrollSuccess),
                                       ),
                                     );
                                   }
@@ -344,7 +347,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Error: ${e.toString().replaceFirst("Exception: ", "")}',
+                                        AppLocalizations.of(context)!.authErrorGeneric,
                                       ),
                                     ),
                                   );
@@ -359,8 +362,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             ),
                             child: Text(
                               isEffectivelyEnrolled
-                                  ? 'Unenroll from Course'
-                                  : 'Enroll in Course',
+                                  ? AppLocalizations.of(context)!.courseButtonUnenroll
+                                  : AppLocalizations.of(context)!.courseButtonEnroll,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -373,7 +376,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: Text(
-                          "Please log in to enroll and view lessons.",
+                          AppLocalizations.of(context)!.courseEnrollmentLoginRequired,
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 15,
@@ -386,22 +389,22 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
                     // --- LESSONS SECTION ---
                     Text(
-                      'Lessons',
+                      AppLocalizations.of(context)!.courseLessonsTitle,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 10),
                     if (course.lessons.isEmpty)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          'No lessons available for this course yet.',
+                          AppLocalizations.of(context)!.courseNoLessons,
                         ),
                       )
                     else if (!isUserLoggedIn && course.lessons.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          'Log in to enroll and access lessons.',
+                          AppLocalizations.of(context)!.courseLoginToAccessLessons,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             color: Colors.grey.shade700,
@@ -414,7 +417,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          'Enroll in the course to view lessons.',
+                           AppLocalizations.of(context)!.courseEnrollToViewLessons,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             color: Colors.grey.shade700,

@@ -98,6 +98,7 @@
   "myCoursesEmptyTitle": "You are not enrolled in any courses yet.",
   "myCoursesEmptySubtitle": "Explore available courses and start learning!",
 
+
   "courseEnrollmentLoginRequired": "Please log in to enroll and view lessons.",
   "courseLessonsTitle": "Lessons",
   "courseNoLessons": "No lessons available for this course yet.",
@@ -139,9 +140,17 @@
   "courseButtonUnenroll": "Unenroll from Course",
   "courseButtonEnroll": "Enroll in Course",
 
+ 
   "courseCardCompleted": "Completed",
   "courseCardViewCourse": "View Course",
   "courseCardTapForDetails": "Tap to view details",
+
+  
+
+
+
+
+
 
   "settingsTitle": "Settings",
   "settingsConfirmLogoutTitle": "Confirm Logout",
