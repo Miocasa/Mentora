@@ -33,7 +33,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     if (!isEffectivelyEnrolled) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text(AppLocalizations.of(context)!.coursePleaseEnrollToWatchLesson),
+      content: Text(AppLocalizations.of(context).coursePleaseEnrollToWatchLesson),
     ),
   );
   return;
@@ -75,7 +75,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     if (!isEffectivelyEnrolled) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text(AppLocalizations.of(context)!.coursePleaseEnrollToViewContent),
+      content: Text(AppLocalizations.of(context).coursePleaseEnrollToViewContent),
     ),
   );
   return;
@@ -119,7 +119,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             if (snapshot.connectionState == ConnectionState.waiting ||
                 !snapshot.hasData ||
                 snapshot.data == null) {
-              return Text(AppLocalizations.of(context)!.courseLoading);
+              return Text(AppLocalizations.of(context).courseLoading);
             }
             return Text(snapshot.data!.title);
           },
@@ -135,7 +135,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               !courseSnapshot.hasData ||
               courseSnapshot.data == null) {
             return Center(
-              child: Text(AppLocalizations.of(context)!.courseNotFound),
+              child: Text(AppLocalizations.of(context).courseNotFound),
             );
           }
 
@@ -242,7 +242,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context)!.courseInstructor(course.instructorName),
+                      AppLocalizations.of(context).courseInstructor(course.instructorName),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 16),
@@ -290,20 +290,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     builder: (BuildContext context) {
                                       return AlertDialog(
                                         title: Text(
-                                            AppLocalizations.of(context)!.courseConfirmUnenrollTitle),
+                                            AppLocalizations.of(context).courseConfirmUnenrollTitle),
                                         content: Text(
-                                          AppLocalizations.of(context)!.courseConfirmUnenrollBody(course.title),
+                                          AppLocalizations.of(context).courseConfirmUnenrollBody(course.title),
                                         ),
                                         actions: <Widget>[
                                           TextButton(
-                                            child: Text(AppLocalizations.of(context)!.courseDialogCancel),
+                                            child: Text(AppLocalizations.of(context).courseDialogCancel),
                                             onPressed: () =>
                                                 Navigator.of(context)
                                                     .pop(false),
                                           ),
                                           TextButton(
                                             child: Text(
-                                              AppLocalizations.of(context)!.courseDialogUnenroll,
+                                              AppLocalizations.of(context).courseDialogUnenroll,
                                               style: TextStyle(
                                                 color: Colors.red,
                                               ),
@@ -324,7 +324,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            AppLocalizations.of(context)!.courseUnenrollSuccess
+                                            AppLocalizations.of(context).courseUnenrollSuccess
                                           ),
                                         ),
                                       );
@@ -337,7 +337,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content:
-                                            Text(AppLocalizations.of(context)!.courseEnrollSuccess),
+                                            Text(AppLocalizations.of(context).courseEnrollSuccess),
                                       ),
                                     );
                                   }
@@ -347,7 +347,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        AppLocalizations.of(context)!.authErrorGeneric,
+                                        AppLocalizations.of(context).authErrorGeneric,
                                       ),
                                     ),
                                   );
@@ -362,8 +362,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             ),
                             child: Text(
                               isEffectivelyEnrolled
-                                  ? AppLocalizations.of(context)!.courseButtonUnenroll
-                                  : AppLocalizations.of(context)!.courseButtonEnroll,
+                                  ? AppLocalizations.of(context).courseButtonUnenroll
+                                  : AppLocalizations.of(context).courseButtonEnroll,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -376,7 +376,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: Text(
-                          AppLocalizations.of(context)!.courseEnrollmentLoginRequired,
+                          AppLocalizations.of(context).courseEnrollmentLoginRequired,
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 15,
@@ -389,7 +389,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
                     // --- LESSONS SECTION ---
                     Text(
-                      AppLocalizations.of(context)!.courseLessonsTitle,
+                      AppLocalizations.of(context).courseLessonsTitle,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 10),
@@ -397,14 +397,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          AppLocalizations.of(context)!.courseNoLessons,
+                          AppLocalizations.of(context).courseNoLessons,
                         ),
                       )
                     else if (!isUserLoggedIn && course.lessons.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          AppLocalizations.of(context)!.courseLoginToAccessLessons,
+                          AppLocalizations.of(context).courseLoginToAccessLessons,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             color: Colors.grey.shade700,
@@ -417,7 +417,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                           AppLocalizations.of(context)!.courseEnrollToViewLessons,
+                           AppLocalizations.of(context).courseEnrollToViewLessons,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             color: Colors.grey.shade700,
