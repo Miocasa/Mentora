@@ -78,13 +78,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    int outerProgress = streak;
-    int innerProgress = streak+2;
-
-    int otherProgressGoal = 5;
-    int innerProgressGoal = 25;
-    final outerTarget = (outerProgress / otherProgressGoal).clamp(0.0, 1.0);
-    final innerTarget = (innerProgress / innerProgressGoal).clamp(0.0, 1.0);
 
     return Scaffold(
       body:  SingleChildScrollView(
@@ -171,67 +164,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             ),
           ),
-          const SizedBox(height: 16),
-          TweenAnimationBuilder<double>(
-            key: ValueKey(outerProgress), // перезапуск анимации при изменении
-            duration: const Duration(milliseconds: 500),
-            tween: Tween<double>(begin: 0, end: 1), // t: 0 → 1
-            builder: (context, t, _) {
-              return AnimatedProgressIndicator(
-                progress: outerTarget * t,    // внешнее кольцо
-                innerProgress: innerTarget * t, // внутреннее кольцо
-                label: '$outerProgress',
-                subLabel: 'За неделю $innerProgress',
-                size: 270,
-                strokeWidth: 16,
-                innerStrokeWidth: 14,
-                outerColor: Colors.green,
-                innerColor: Colors.amber,
-              );
-            },
-          ),
-          const SizedBox(height: 32),
-          Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.star, size: 24, color: Colors.green),
-                const SizedBox(width: 2),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Очки", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    // Text("Очков"),
-                  ],
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.access_time, size: 24, color: Colors.amber),
-                const SizedBox(width: 2),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Дни", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    // Text("Стрика"),
-                  ],
-                ),
-              ],
-            ),
-            
-          ],
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'Вы почти достигли цели 👍',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 18
-            ),
-          ),
-            const SizedBox(height: 100),
         ],
         ),
       ),

@@ -131,11 +131,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             borderRadius: BorderRadius.circular(25),
                             border: isSelected
                                 ? Border.all(color: colorScheme.outlineVariant, width: 3)
-                                : Border.all(color: colorValue.withOpacity(0.5), width: 1),
+                                : Border.all(color: colorValue.withAlpha(128), width: 1),
                             boxShadow: isSelected
                                 ? [
                               BoxShadow(
-                                color: colorValue.withOpacity(0.5),
+                                color: colorValue.withAlpha(128),
                                 blurRadius: 6.0,
                                 offset: const Offset(0, 2),
                               )
