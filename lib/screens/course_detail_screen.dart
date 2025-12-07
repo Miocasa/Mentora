@@ -1,3 +1,4 @@
+import 'package:course/generated/app_localizations.dart';
 import 'package:course/models/course.dart';
 import 'package:course/models/lesson.dart';
 import 'package:course/screens/markdown_reader_screen.dart';
@@ -6,9 +7,9 @@ import 'package:course/services/auth_service.dart';
 import 'package:course/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:course/generated/app_localizations.dart';
 
+// ЛОКАЛИЗАЦИЯ
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -30,14 +31,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     EnrollmentDetails? enrollment,
     bool isEffectivelyEnrolled,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!isEffectivelyEnrolled) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(AppLocalizations.of(context)!.coursePleaseEnrollToWatchLesson),
-    ),
-  );
-  return;
-}
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.coursePleaseEnrollToWatchLesson),
+        ),
+      );
+      return;
+    }
 
     Navigator.push(
       context,
@@ -72,14 +75,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     EnrollmentDetails? enrollment,
     bool isEffectivelyEnrolled,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!isEffectivelyEnrolled) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(AppLocalizations.of(context)!.coursePleaseEnrollToViewContent),
-    ),
-  );
-  return;
-}
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.coursePleaseEnrollToViewContent),
+        ),
+      );
+      return;
+    }
 
     Navigator.push(
       context,
@@ -109,6 +114,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isUserLoggedIn = _authService.currentUser != null;
 
     return Scaffold(
@@ -119,7 +125,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             if (snapshot.connectionState == ConnectionState.waiting ||
                 !snapshot.hasData ||
                 snapshot.data == null) {
-              return Text(AppLocalizations.of(context)!.courseLoading);
+              return Text(l10n.courseLoading);
             }
             return Text(snapshot.data!.title);
           },
@@ -135,7 +141,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               !courseSnapshot.hasData ||
               courseSnapshot.data == null) {
             return Center(
-              child: Text(AppLocalizations.of(context)!.courseNotFound),
+              child: Text(l10n.courseNotFound),
             );
           }
 
@@ -166,8 +172,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 progressPercent = enrollment.progressPercentage;
               }
 
-              // 🟢 СПИСОК ЗАВЕРШЁННЫХ УРОКОВ ПО ID
-              // Замени `completedLessonIds` на своё название, если нужно
+              // список завершённых уроков по id
               final List<String> completedLessonIds =
                   enrollment?.completedLessonIds ?? <String>[];
 
@@ -242,7 +247,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context)!.courseInstructor(course.instructorName),
+                      l10n.courseInstructor(course.instructorName),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 16),
@@ -284,27 +289,34 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             onPressed: () async {
                               try {
                                 if (isEffectivelyEnrolled) {
-                                  bool? confirmUnenroll =
+                                  final bool? confirmUnenroll =
                                       await showDialog<bool>(
                                     context: context,
                                     builder: (BuildContext context) {
+                                      final dialogL10n =
+                                          AppLocalizations.of(context)!;
                                       return AlertDialog(
-                                        title: Text(
-                                            AppLocalizations.of(context)!.courseConfirmUnenrollTitle),
+                                        title: Text(dialogL10n
+                                            .courseConfirmUnenrollTitle),
                                         content: Text(
-                                          AppLocalizations.of(context)!.courseConfirmUnenrollBody(course.title),
+                                          dialogL10n
+                                              .courseConfirmUnenrollBody(
+                                            course.title,
+                                          ),
                                         ),
                                         actions: <Widget>[
                                           TextButton(
-                                            child: Text(AppLocalizations.of(context)!.courseDialogCancel),
+                                            child: Text(dialogL10n
+                                                .courseDialogCancel),
                                             onPressed: () =>
                                                 Navigator.of(context)
                                                     .pop(false),
                                           ),
                                           TextButton(
                                             child: Text(
-                                              AppLocalizations.of(context)!.courseDialogUnenroll,
-                                              style: TextStyle(
+                                              dialogL10n
+                                                  .courseDialogUnenroll,
+                                              style: const TextStyle(
                                                 color: Colors.red,
                                               ),
                                             ),
@@ -323,9 +335,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
-                                          content: Text(
-                                            AppLocalizations.of(context)!.courseUnenrollSuccess
-                                          ),
+                                          content: Text(l10n
+                                              .courseUnenrollSuccess),
                                         ),
                                       );
                                     }
@@ -336,8 +347,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content:
-                                            Text(AppLocalizations.of(context)!.courseEnrollSuccess),
+                                        content: Text(
+                                          l10n.courseEnrollSuccess,
+                                        ),
                                       ),
                                     );
                                   }
@@ -347,7 +359,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        AppLocalizations.of(context)!.authErrorGeneric,
+                                        l10n.authErrorGeneric,
                                       ),
                                     ),
                                   );
@@ -362,8 +374,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             ),
                             child: Text(
                               isEffectivelyEnrolled
-                                  ? AppLocalizations.of(context)!.courseButtonUnenroll
-                                  : AppLocalizations.of(context)!.courseButtonEnroll,
+                                  ? l10n.courseButtonUnenroll
+                                  : l10n.courseButtonEnroll,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -376,7 +388,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: Text(
-                          AppLocalizations.of(context)!.courseEnrollmentLoginRequired,
+                          l10n.courseEnrollmentLoginRequired,
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 15,
@@ -389,22 +401,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
                     // --- LESSONS SECTION ---
                     Text(
-                      AppLocalizations.of(context)!.courseLessonsTitle,
+                      l10n.courseLessonsTitle,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 10),
                     if (course.lessons.isEmpty)
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.courseNoLessons,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(l10n.courseNoLessons),
                       )
                     else if (!isUserLoggedIn && course.lessons.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          AppLocalizations.of(context)!.courseLoginToAccessLessons,
+                          l10n.courseLoginToAccessLessons,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             color: Colors.grey.shade700,
@@ -417,7 +427,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                           AppLocalizations.of(context)!.courseEnrollToViewLessons,
+                          l10n.courseEnrollToViewLessons,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             color: Colors.grey.shade700,
@@ -432,8 +442,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                         itemBuilder: (context, index) {
                           final lesson = course.lessons[index];
 
-                          // 🟢 ТЕПЕРЬ УРОК СЧИТАЕТСЯ ЗАВЕРШЁННЫМ
-                          // ЕСЛИ ЕГО ID ЕСТЬ В completedLessonIds
                           final bool lessonCompleted =
                               enrollment?.isCompleted == true ||
                                   completedLessonIds.contains(lesson.id);
@@ -479,8 +487,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                       overflow: TextOverflow.ellipsis,
                                     )
                                   : null,
-
-                              // сейчас: тап по плитке = открываем markdown
                               onTap: () => _openMarkdownLesson(
                                 context,
                                 course,
@@ -488,11 +494,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 enrollment,
                                 isEffectivelyEnrolled,
                               ),
-
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // TEXT ICON
                                   if (!lessonCompleted)
                                     IconButton(
                                       icon: Icon(
@@ -514,8 +518,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                         isEffectivelyEnrolled,
                                       ),
                                     ),
-
-                                  // VIDEO / CHECK ICON
                                   IconButton(
                                     icon: Icon(
                                       lessonCompleted
