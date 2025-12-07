@@ -2,16 +2,33 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:course/models/course.dart';
 import 'package:course/models/lesson.dart';
 import 'package:course/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+class UserProfile {
+  final String name;
+  final String email;
+  final String role;
+  final int streak;      // 🔥 очки за сегодня (наружнее кольцо)
+  final int streakDays;  // 🔥 дни стрика подряд (внутреннее кольцо)
+
+  UserProfile({
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.streak,
+    required this.streakDays,
+  });
+}
 
 // --- Enrollment Details Model ---
 class EnrollmentDetails {
   final String courseId;
   final DateTime enrolledAt;
-  int completedLessons; // Made non-final to be updatable by markLessonAsCompleted logic if needed locally
+  int completedLessons;
   final int totalLessons;
-  bool isCompleted; // Made non-final
-  final List<String> completedLessonIds; // For robust tracking
+  bool isCompleted;
+  final List<String> completedLessonIds;
 
   EnrollmentDetails({
     required this.courseId,
@@ -33,9 +50,9 @@ class EnrollmentDetails {
     );
   }
 
-  Map<String, dynamic> toMap() { // For potential local updates or new enrollments
+  Map<String, dynamic> toMap() {
     return {
-      'courseId': courseId, // Not usually stored in the doc itself if docId is courseId
+      'courseId': courseId,
       'enrolledAt': Timestamp.fromDate(enrolledAt),
       'completedLessons': completedLessons,
       'totalLessons': totalLessons,
@@ -46,10 +63,8 @@ class EnrollmentDetails {
 
   double get progressPercentage {
     if (totalLessons == 0) return 0.0;
-    // Use completedLessonIds.length if it's the source of truth for completed lessons
-    if (completedLessonIds.isNotEmpty && completedLessonIds.length != completedLessons) {
-      // This case indicates a potential mismatch if completedLessons isn't solely derived from completedLessonIds.length
-      // For robustness, prefer completedLessonIds.length
+    if (completedLessonIds.isNotEmpty &&
+        completedLessonIds.length != completedLessons) {
       return completedLessonIds.length / totalLessons;
     }
     return completedLessons / totalLessons;
@@ -63,32 +78,79 @@ class MyCourseInfo {
   MyCourseInfo(this.course, this.enrollmentDetails);
 }
 
-
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final AuthService _authService = AuthService();
 
   // --- Course Functions ---
+
   Stream<List<Course>> getCourses() {
-    return _db.collection('courses').snapshots().map((snapshot) => snapshot.docs
-        .map((doc) => Course.fromMap(doc.data(), doc.id))
-        .toList());
-    // for(int i = 0; i < sampleCourses ;)
-    // Stream<List<Course>> courses = Course(description: '',
-    //  id: '',
-    //  title: '',
-    //  instructorName: '',
-    //  imageUrl: '') as Stream<List<Course>>;
-    // courses = sampleCourses[0];
-    // return courses;
-    
+    return _db.collection('courses').snapshots().map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Course.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
+  }
+
+  Stream<UserProfile> userProfileStream(User user) {
+    return _db.collection('users').doc(user.uid).snapshots().map((doc) {
+      final data = doc.data() ?? {};
+
+      final String email = (data['email'] ?? user.email ?? '?') as String;
+      final String name = (data['name'] ?? 'Имя не задано') as String;
+      final String role = (data['role'] ?? 'student') as String;
+
+      // streak = очки, streakDays = дни стрика
+      final int streak = (data['streak'] ?? 0) as int;
+      final int streakDays = (data['streakDays'] ?? 0) as int;
+
+      return UserProfile(
+        name: name,
+        email: email,
+        role: role,
+        streak: streak,
+        streakDays: streakDays,
+      );
+    });
+  }
+
+  Future<UserProfile> getUserProfile(User user) async {
+    final doc = await _db.collection('users').doc(user.uid).get();
+
+    if (!doc.exists) {
+      final String email = user.email ?? '?';
+      return UserProfile(
+        name: 'Имя не задано',
+        email: email,
+        role: 'student',
+        streak: 0,
+        streakDays: 0,
+      );
+    }
+
+    final data = doc.data() ?? {};
+
+    final String email = (data['email'] ?? user.email ?? '?') as String;
+    final String name = (data['name'] ?? 'Имя не задано') as String;
+    final String role = (data['role'] ?? 'student') as String;
+
+    final int streak = (data['streak'] ?? 0) as int;
+    final int streakDays = (data['streakDays'] ?? 0) as int;
+
+    return UserProfile(
+      name: name,
+      email: email,
+      role: role,
+      streak: streak,
+      streakDays: streakDays,
+    );
   }
 
   Future<Course?> getCourseById(String courseId) async {
     try {
       DocumentSnapshot doc =
-      await _db.collection('courses').doc(courseId).get();
-      debugPrint("--- Cources by id --- (${doc.id}})");
+          await _db.collection('courses').doc(courseId).get();
+      debugPrint("--- Courses by id --- (${doc.id})");
       if (doc.exists) {
         return Course.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }
@@ -98,7 +160,67 @@ class FirestoreService {
     return null;
   }
 
+  // --- Helpers for streak ---
+
+  DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+  /// Обновляет streak (очки за сегодня) и streakDays (дни стрика) после нового урока.
+  Future<void> updateUserStatsAfterLessonCompleted() async {
+    final user = _authService.currentUser;
+    if (user == null) throw Exception("User not logged in.");
+
+    final userRef = _db.collection('users').doc(user.uid);
+    final DateTime today = _dateOnly(DateTime.now());
+
+    await _db.runTransaction((tx) async {
+      final snap = await tx.get(userRef);
+      final Map<String, dynamic> data = snap.data() ?? {};
+
+      final int currentPoints = (data['streak'] ?? 0) as int; // очки за сегодня
+      final int currentStreakDays =
+          (data['streakDays'] ?? 0) as int; // дни стрика
+      final Timestamp? lastTs = data['lastStudyDate'] as Timestamp?;
+
+      int newPoints;
+      int newStreakDays;
+
+      if (lastTs == null) {
+        // первый урок вообще
+        newPoints = 1;
+        newStreakDays = 1;
+      } else {
+        final DateTime lastDate = _dateOnly(lastTs.toDate());
+        final int diff = today.difference(lastDate).inDays;
+
+        if (diff == 0) {
+          // урок уже был сегодня → добавляем очки, дни стрика не меняем
+          newPoints = currentPoints + 1;
+          newStreakDays = currentStreakDays == 0 ? 1 : currentStreakDays;
+        } else if (diff == 1) {
+          // вчера были уроки, сегодня тоже → продолжаем стрик
+          newPoints = 1; // новый день — очки сначала
+          newStreakDays = currentStreakDays + 1;
+        } else {
+          // пропущено больше одного дня → всё с нуля
+          newPoints = 1;
+          newStreakDays = 1;
+        }
+      }
+
+      tx.set(
+        userRef,
+        {
+          'streak': newPoints,         // очки за сегодня
+          'streakDays': newStreakDays, // дни стрика
+          'lastStudyDate': Timestamp.fromDate(today),
+        },
+        SetOptions(merge: true),
+      );
+    });
+  }
+
   // --- Enrollment Functions ---
+
   Future<void> enrollInCourse(String courseId) async {
     final user = _authService.currentUser;
     if (user == null) {
@@ -117,13 +239,14 @@ class FirestoreService {
           .doc(courseId)
           .set({
         'enrolledAt': FieldValue.serverTimestamp(),
-        'courseTitle': course.title, // Denormalized for easier display in "My Courses" if needed
+        'courseTitle': course.title,
         'completedLessons': 0,
         'totalLessons': course.lessons.length,
         'isCompleted': false,
-        'completedLessonIds': [], // Initialize empty list for robust tracking
+        'completedLessonIds': [],
       });
-      debugPrint("User ${user.uid} enrolled in course $courseId with ${course.lessons.length} total lessons.");
+      debugPrint(
+          "User ${user.uid} enrolled in course $courseId with ${course.lessons.length} total lessons.");
     } catch (e) {
       debugPrint("Error enrolling in course: $e");
       rethrow;
@@ -178,40 +301,57 @@ class FirestoreService {
         .collection('enrolledCourses')
         .doc(courseId);
 
+    bool lessonJustAdded = false;
+
     try {
       await _db.runTransaction((transaction) async {
-        DocumentSnapshot enrollmentSnap = await transaction.get(enrollmentRef);
+        final enrollmentSnap = await transaction.get(enrollmentRef);
         if (!enrollmentSnap.exists || enrollmentSnap.data() == null) {
-          throw Exception("User not enrolled or enrollment data missing.");
+          throw Exception("User not enrolled.");
         }
 
-        Map<String, dynamic> enrollmentData = enrollmentSnap.data() as Map<String, dynamic>;
-        List<String> completedLessonIds = List<String>.from(enrollmentData['completedLessonIds'] ?? []);
-        int totalLessons = enrollmentData['totalLessons'] ?? 0;
+        final data = enrollmentSnap.data() as Map<String, dynamic>;
+        final completed =
+            List<String>.from(data['completedLessonIds'] ?? []);
 
-        if (!completedLessonIds.contains(lessonId)) {
-          completedLessonIds.add(lessonId);
+        // урок уже отмечен — ничего не делаем
+        if (completed.contains(lessonId)) {
+          return;
         }
 
-        int newCompletedLessonsCount = completedLessonIds.length;
-        bool courseIsNowCompleted = (totalLessons > 0 && newCompletedLessonsCount >= totalLessons);
+        completed.add(lessonId);
+        lessonJustAdded = true;
+
+        final int totalLessons = data['totalLessons'] ?? 0;
+        final bool isCompleted = completed.length >= totalLessons;
 
         transaction.update(enrollmentRef, {
-          'completedLessonIds': completedLessonIds,
-          'completedLessons': newCompletedLessonsCount, // Update this based on the list length
-          'isCompleted': courseIsNowCompleted,
+          'completedLessonIds': completed,
+          'completedLessons': completed.length,
+          'isCompleted': isCompleted,
           'lastProgressTimestamp': FieldValue.serverTimestamp(),
         });
       });
-      debugPrint("Lesson $lessonId for course $courseId marked complete for user ${user.uid}");
+
+      if (!lessonJustAdded) {
+        debugPrint(
+            "Lesson $lessonId for course $courseId already completed for user ${user.uid}, stats not updated.");
+        return;
+      }
+
+      debugPrint(
+          "Lesson $lessonId for course $courseId marked complete for user ${user.uid}");
+
+      // новый урок → обновляем очки и дни стрика
+      await updateUserStatsAfterLessonCompleted();
     } catch (e) {
       debugPrint("Error marking lesson complete: $e");
       rethrow;
     }
   }
 
-
   // --- My Courses Functions ---
+
   Stream<List<MyCourseInfo>> getMyCoursesWithProgress() {
     final user = _authService.currentUser;
     if (user == null) {
@@ -222,7 +362,7 @@ class FirestoreService {
         .collection('users')
         .doc(user.uid)
         .collection('enrolledCourses')
-        .orderBy('enrolledAt', descending: true) // Optional: order by enrollment time
+        .orderBy('enrolledAt', descending: true)
         .snapshots()
         .asyncMap((enrollmentSnapshot) async {
       List<MyCourseInfo> myCoursesList = [];
@@ -233,103 +373,119 @@ class FirestoreService {
         Course? course = await getCourseById(courseId);
 
         if (course != null) {
-          EnrollmentDetails details = EnrollmentDetails.fromMap(courseId, enrollmentData);
+          EnrollmentDetails details =
+              EnrollmentDetails.fromMap(courseId, enrollmentData);
           myCoursesList.add(MyCourseInfo(course, details));
         } else {
-          debugPrint("Course data not found for enrolled course ID: $courseId. User: ${user.uid}");
-          // You might want to handle this case, e.g., by removing the orphaned enrollment record
-          // or displaying a placeholder. For now, we just skip it.
+          debugPrint(
+              "Course data not found for enrolled course ID: $courseId. User: ${user.uid}");
         }
       }
       return myCoursesList;
     });
   }
 
-
   // --- Sample Data (ensure lesson IDs are unique) ---
   Future<void> addSampleCoursesWithLessons() async {
     final coursesCollection = _db.collection('courses');
 
-    // A simple check to avoid adding if data might exist. Consider more robust checks.
-    // final QuerySnapshot existingCheck = await coursesCollection.limit(1).get();
-    // if (existingCheck.docs.isNotEmpty) {
-    //   // Check if the existing course has lessons to prevent re-adding
-    //   var firstCourseData = existingCheck.docs.first.data() as Map<String, dynamic>?;
-    //   if (firstCourseData != null && (firstCourseData['lessons'] as List?)?.isNotEmpty == true) {
-    //     debugPrint("Sample courses with lessons likely already exist.");
-    //     return;
-    //   }
-    // }
-
-
     final List<Course> sampleCourses = [
       Course(
-        id: 'flutter_basics_001', // Using specific IDs for sample data
-        title: 'Flutter for Absolute Beginners',
-        description: 'Your first step into mobile app development with Flutter. Covers widgets, layouts, and state management basics.',
+        id: 'flutter_basics_001',
+        title: '🚀 Flutter с нуля до профи 🛠',
+        description:
+            'В ходе курса, мы вместе разберемся с тем, что такое Flutter и как на нем сделать первое приложение.',
         instructorName: 'Ada Lovelace',
-        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Zmx1dHRlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60', // Replace with a real placeholder
+        imageUrl:
+            'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
         lessons: [
-          Lesson(id: 'fb_l1', title: 'Introduction to Flutter', videoUrl: 'https://vkvideo.ru/video-194945663_456239238', order: 1, description: "What is Flutter and why use it?", textLessonMd: ""),
-          Lesson(id: 'fb_l2', title: 'Setting up Your Environment', videoUrl: 'YOUR_GCS_VIDEO_URL_2_HERE', order: 2, description: "Install Flutter and configure your IDE.", textLessonMd: ""),
-          Lesson(id: 'fb_l3', title: 'Your First Flutter App', videoUrl: 'YOUR_GCS_VIDEO_URL_3_HERE', order: 3, description: "Hello World in Flutter: Understanding the main.dart file.", textLessonMd: ""),
-          Lesson(id: 'fb_l4', title: 'Basic Widgets', videoUrl: 'YOUR_GCS_VIDEO_URL_4_HERE', order: 4, description: "Exploring Text, Container, Row, Column.", textLessonMd: ""),
-        ],
-      ),
-      Course(
-        id: 'deserts_cooking_003',
-        title: 'Cook with Sanji',
-        description: 'Cource for peeple that interested how to cook Milk',
-        instructorName: 'KingChris',
-        imageUrl: 'https://i.imgur.com/UBZ7p91.jpeg&auto=format&fit=crop&w=500&q=60',
-        lessons: [
-          Lesson(id: 'dc_l1', title: 'What is milk', videoUrl: 'YOUR_GCS_VIDEO_URL_8_HERE', order: 1, description: "Milk definition, witch types of milk exist and everything you need to start cook."),
-          Lesson(id: 'dc_l2', title: 'Eden Wuffels', videoUrl: 'YOUR_GCS_VIDEO_URL_9_HERE', order: 2, description: "PlaceHolder"),
-          Lesson(id: 'dc_l3', title: 'PlaceHolder', videoUrl: 'YOUR_GCS_VIDEO_URL_10_HERE', order: 3, description: "PlaceHolder"),
-        ],
-      ),
-      Course(
-        id: 'dart_deep_dive_002',
-        title: 'Advanced Dart Programming',
-        description: 'Master the Dart language for powerful Flutter apps. Dive into asynchronous programming, streams, and more.',
-        instructorName: 'Charles Babbage',
-        imageUrl: 'https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8ZGFydCUyMHByb2dyYW1taW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60', // Replace
-        lessons: [
-          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding async, await, and Future objects."),
-          Lesson(id: 'dd_l2', title: 'Streams in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data."),
-          Lesson(id: 'dd_l3', title: 'Error Handling in Dart', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions."),
-        ],
-      ),
-      Course(
-        id: 'cpp_deep_dive_004',
-        title: 'Advanced C++ Programming',
-        description: 'Master the C++ language for cli apps. Dive into asynchronous programming, streams, and more.',
-        instructorName: 'Edureka',
-        imageUrl: 'https://i.imgur.com/JztWcE7.png&auto=format&fit=crop&w=500&q=60', // Replace
-        lessons: [
-          Lesson(id: 'dd_l1', title: 'Asynchronous Programming: Futures', videoUrl: 'YOUR_GCS_VIDEO_URL_5_HERE', order: 1, description: "Understanding asyncronic programming."),
-          Lesson(id: 'dd_l2', title: 'Types in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_6_HERE', order: 2, description: "Handling sequences of asynchronous data."),
-          Lesson(id: 'dd_l3', title: 'Error Handling in C++', videoUrl: 'YOUR_GCS_VIDEO_URL_7_HERE', order: 3, description: "Try, catch, finally, and custom exceptions."),
+          Lesson(
+            id: 'fb_l1',
+            title: 'Введение',
+            videoUrl:
+                'https://www.youtube.com/watch?v=FI-VshKxDZ0&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=1&pp=iAQB',
+            order: 1,
+            description:
+                "Почему Flutter — лучший выбор в 2025 году, обзор курса",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043958/lesson1_zditxn.md",
+          ),
+          Lesson(
+            id: 'fb_l2',
+            title: 'Установка и запуск первого приложения',
+            videoUrl:
+                'https://www.youtube.com/watch?v=SZDF1Y1K1UE&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=2&pp=iAQB',
+            order: 2,
+            description:
+                "Полная установка на Windows/macOS/Linux, flutter doctor, первое приложение",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043958/lesson2_pprqd1.md",
+          ),
+          Lesson(
+            id: 'fb_l3',
+            title: 'Основные виджеты: Stateful vs Stateless, Scaffold',
+            videoUrl:
+                'https://www.youtube.com/watch?v=6zrgNEDpwMo&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=3&pp=iAQB',
+            order: 3,
+            description:
+                "Разница между Stateless и Stateful, структура MaterialApp",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043958/lesson3_owoz6v.md",
+          ),
+          Lesson(
+            id: 'fb_l4',
+            title: 'Верстка, работа с темой, установка пакетов',
+            videoUrl:
+                'https://www.youtube.com/watch?v=QN6f3AmoMOE&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=4&pp=iAQB',
+            order: 4,
+            description:
+                "Container, Row/Column, темы, google_fonts, красивые карточки",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson4_ylj410.md",
+          ),
+          Lesson(
+            id: 'fb_l5',
+            title: 'Навигация: Navigator, Named Routes, go_router',
+            videoUrl:
+                'https://www.youtube.com/watch?v=C8Qbk9PQR7M&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=5&t=6s&pp=iAQB',
+            order: 5,
+            description:
+                "Современная навигация с go_router, переходы с анимацией",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson5_awfyds.md",
+          ),
+          Lesson(
+            id: 'fb_l6',
+            title: 'Архитектура проекта, рефакторинг, декомпозиция',
+            videoUrl:
+                'https://www.youtube.com/watch?v=B911Fi5UwwI&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=6&pp=iAQB',
+            order: 6,
+            description:
+                "Feature-first структура, чистый код, разделение ответственностей",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson6_hyjkbo.md",
+          ),
+          Lesson(
+            id: 'fb_l7',
+            title: 'Работа с API, http и Dio',
+            videoUrl:
+                'https://www.youtube.com/watch?v=aT4hddCYSX4&list=PLtUuja72DaLIiIYLQP7rUjxItkDjHcSMw&index=7&pp=iAQB0gcJCRUKAYcqIYzv',
+            order: 7,
+            description:
+                "Dio + retrofit + интерсепторы, обработка ошибок, кэширование",
+            markdownUrl:
+                "https://res.cloudinary.com/dackd9qol/raw/upload/v1765043959/lesson7_p0mvka.md",
+          ),
         ],
       ),
     ];
 
     WriteBatch batch = _db.batch();
     for (var course in sampleCourses) {
-      DocumentReference courseRef = coursesCollection.doc(course.id);
-      // merge: true — обновит существующий документ или создаст новый
+      final courseRef = coursesCollection.doc(course.id);
       batch.set(courseRef, course.toMap(), SetOptions(merge: true));
     }
     await batch.commit();
     debugPrint("Added/Updated sample courses with lessons to Firestore.");
-
-
-    // WriteBatch batch = _db.batch();
-    // for (var course in sampleCourses) {
-    //   DocumentReference courseRef = coursesCollection.doc(course.id);
-    //   batch.set(courseRef, course.toMap());
-    // }
-    // await batch.commit();
-    // debugPrint("Added/Updated sample courses with lessons to Firestore.");
   }
 }

@@ -35,6 +35,7 @@ class ThemeProvider with ChangeNotifier {
   ThemeData get currentLightTheme => _generateTheme(_primaryColor, Brightness.light);
   ThemeData get currentDarkTheme => _generateTheme(_primaryColor, Brightness.dark);
 
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
 
   ThemeProvider() {
     _loadThemePreferences();
@@ -112,6 +113,9 @@ class ThemeProvider with ChangeNotifier {
         foregroundColor: colorScheme.onSurfaceVariant,
         elevation: 0,
       ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        year2023: false,
+      ),
       cardTheme: CardThemeData(
         elevation: 1,
         color: cardBackgroundColor, // Use the adjusted card background color
@@ -125,6 +129,12 @@ class ThemeProvider with ChangeNotifier {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
+      ),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+        )
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(

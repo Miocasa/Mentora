@@ -33,7 +33,7 @@ class AuthGate extends StatelessWidget {
         if (snapshot.hasData && snapshot.data != null) {
           // User is logged in
           debugPrint("AuthGate: User is logged in - ${snapshot.data!.uid}. Showing HomeScreen.");
-          return const HomeScreen();
+          return const MainScreen();
         } else {
           // User is not logged in (or logged out)
           debugPrint("AuthGate: User is not logged in. Showing LoginScreen.");

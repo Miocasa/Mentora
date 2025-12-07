@@ -34,8 +34,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _errorMessage = null;
       });
       final userCredential = await _authService.signUpWithEmailPassword(
-        email: _nameController.text.trim(),
-        password: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
         name: _nameController.text.trim(),
       );
       setState(() {
