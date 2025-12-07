@@ -174,7 +174,7 @@ class FirestoreService {
 
     await _db.runTransaction((tx) async {
       final snap = await tx.get(userRef);
-      final data = snap.data() as Map<String, dynamic>? ?? {};
+      final Map<String, dynamic> data = snap.data() ?? {};
 
       final int currentPoints = (data['streak'] ?? 0) as int; // очки за сегодня
       final int currentStreakDays =

@@ -9,6 +9,7 @@ import 'package:course/screens/user_profile_screen.dart';
 import 'package:course/services/auth_service.dart';
 import 'package:course/services/firestore_service.dart';
 import 'package:course/widgets/course_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Debouncer class
@@ -265,7 +266,8 @@ class _MainScreenState extends State<MainScreen> {
           );
         }).toList(),
       ),
-      floatingActionButton: _isSearching || _selectedIndex != 0
+      
+      floatingActionButton: (kReleaseMode || _isSearching || _selectedIndex != 0)
           ? null
           : FloatingActionButton.extended(
               onPressed: () async {
@@ -277,7 +279,7 @@ class _MainScreenState extends State<MainScreen> {
                   );
                 }
               },
-              label: const Text('Sample Data'),
+              label: const Text('Sample Data'), 
               icon: const Icon(Icons.data_exploration_outlined),
             ),
     );
