@@ -5,6 +5,8 @@ import 'package:course/services/firestore_service.dart';
 import 'package:course/widgets/course_card.dart';
 import 'package:flutter/material.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
 
 class MyCoursesScreen extends StatefulWidget {
   const MyCoursesScreen({super.key});
@@ -30,8 +32,8 @@ class _MyCoursesScreenState extends State<MyCoursesScreen> {
       //     child: Text('Please log in to see your courses.'),
       //   ),
       // );
-      return const Center(
-          child: Text('Please log in to see your courses.'),
+      return Center(
+          child: Text(AppLocalizations.of(context)!.myCoursesLoginToSee),
       );
     }
 
@@ -42,18 +44,22 @@ class _MyCoursesScreenState extends State<MyCoursesScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)!.myCoursesErrorWithReason(snapshot.error.toString()),
+            ),
+          );
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.school_outlined, size: 60, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('You are not enrolled in any courses yet.', style: TextStyle(fontSize: 16)),
+                  Text(AppLocalizations.of(context)!.myCoursesEmptyTitle, style: const TextStyle(fontSize: 16)),
                   SizedBox(height: 8),
-                  Text('Explore available courses and start learning!', style: TextStyle(color: Colors.grey)),
+                  Text(AppLocalizations.of(context)!.myCoursesEmptySubtitle, style: const TextStyle(color: Colors.grey)),
                 ],
               ),
             );

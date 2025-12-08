@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:course/generated/app_localizations.dart';
+
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
@@ -21,9 +23,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
     // User is not authenticated
     if (user == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: Text('Пожалуйста, войдите, чтобы увидеть профиль.'),
+          child: Text(AppLocalizations.of(context)!.profileLoginToSee),
         ),
       );
     }
@@ -40,14 +42,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text('Ошибка загрузки профиля: ${snapshot.error}'),
+              child: Text(AppLocalizations.of(context)!.profileLoadErrorWithReason(snapshot.error.toString())),
             ),
           );
         }
 
         if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(child: Text('Профиль не найден.')),
+          return Scaffold(
+            body: Center(child: Text(AppLocalizations.of(context)!.profileNotFound),),
           );
         }
 
@@ -109,7 +111,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   const SizedBox(height: 20),
 
                   Text(
-                    name.isNotEmpty ? name : 'Имя не задано',
+                    name.isNotEmpty ? name : AppLocalizations.of(context)!.profileNameNotSet,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
@@ -148,7 +150,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           ? Colors.orange.shade700 
                           : colorScheme.outline,
                         ),
-                        label: Text('$streak ${streak == 1 ? 'day' : 'дня'} стрик'),
+                        label: Text(AppLocalizations.of(context)!.profileStreakChip(streak)),
                         backgroundColor: streak > 0 
                             ? ( Colors.orange.shade50 )
                             : colorScheme.surfaceContainerHighest,
@@ -170,8 +172,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       floatingActionButton: FloatingActionButton( // Hide FAB when searching
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Редактирование профиля скоро будет доступно'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.profileEditSoon),
               behavior: SnackBarBehavior.floating,
             ),
           );

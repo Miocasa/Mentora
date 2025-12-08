@@ -1,6 +1,8 @@
 import 'package:course/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -43,7 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
       if (userCredential == null) {
         setState(() {
-          _errorMessage = "Sign up failed. Please try again or use a different email.";
+          _errorMessage = AppLocalizations.of(context)!.signUpFailed;
           // You might want to show more specific errors from AuthService
         });
       } else {
@@ -51,7 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (mounted) { // Check if the widget is still in the tree
           // Show a success message before popping
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Account created successfully! Please log in.')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.signUpSuccess)),
           );
           Navigator.of(context).pop(); // Go back to Login or AuthGate will handle it
         }
@@ -95,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch, // Make buttons stretch
                 children: <Widget>[
                   Text(
-                    'Create Account',
+                    AppLocalizations.of(context)!.signUpTitle,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -103,7 +105,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Join us by filling out the form below',
+                    AppLocalizations.of(context)!.signUpSubtitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -114,8 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _nameController,
                     keyboardType: TextInputType.name,
                     decoration: InputDecoration(
-                      labelText: 'Nickname',
-                      hintText: 'Your nickname',
+                      labelText: AppLocalizations.of(context)!.signUpNicknameLabel,
+                      hintText: AppLocalizations.of(context)!.signUpNicknameHint,
                       prefixIcon: const Icon(Icons.person),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -123,7 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a valid name';
+                        return AppLocalizations.of(context)!.signUpNicknameErrorEmpty;
                       }
                       if (!isNicknameValid(value, forbiddenSymbols)){
                         return 'Symbols \" />\\|^&*(){}\$#@!%+_=- \" not allowed';
@@ -136,8 +138,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'you@example.com',
+                      labelText: AppLocalizations.of(context)!.signUpEmailLabel,
+                      hintText: AppLocalizations.of(context)!.signUpEmailHint,
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -145,7 +147,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty || !value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return AppLocalizations.of(context)!.signUpEmailError;
                       }
                       return null;
                     },
@@ -154,8 +156,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Create a strong password',
+                      labelText: AppLocalizations.of(context)!.signUpPasswordLabel,
+                      hintText: AppLocalizations.of(context)!.signUpPasswordHint,
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -174,10 +176,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     obscureText: _obscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                        return AppLocalizations.of(context)!.signUpPasswordErrorEmpty;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return AppLocalizations.of(context)!.signUpPasswordErrorShort;
                       }
                       return null;
                     },
@@ -186,8 +188,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      hintText: 'Re-enter your password',
+                      labelText: AppLocalizations.of(context)!.signUpConfirmPasswordLabel,
+                      hintText: AppLocalizations.of(context)!.signUpConfirmPasswordHint,
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -206,10 +208,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     obscureText: _obscureConfirmPassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
+                        return AppLocalizations.of(context)!.signUpConfirmPasswordErrorEmpty;
                       }
                       if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return AppLocalizations.of(context)!.signUpConfirmPasswordErrorNotMatch;
                       }
                       return null;
                     },
@@ -236,21 +238,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         )
                     ),
                     onPressed: _signUp,
-                    child: const Text('Sign Up'),
+                    child: Text(AppLocalizations.of(context)!.signUpButton),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account?',
+                        AppLocalizations.of(context)!.signUpAlreadyHaveAccount,
                         style: theme.textTheme.bodyMedium,
                       ),
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pop(); // Go back to Login Screen
                         },
-                        child: const Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text(AppLocalizations.of(context)!.signUpLoginLink, style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),

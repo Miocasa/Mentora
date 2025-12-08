@@ -2,6 +2,8 @@ import 'package:course/screens/signup_screen.dart';
 import 'package:course/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -32,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       if (userCredential == null) {
         setState(() {
-          _errorMessage = "Login failed. Check your credentials.";
+          _errorMessage = AppLocalizations.of(context)!.loginFailed;
           // You might want to show more specific errors from AuthService
         });
       } else {
@@ -69,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // const SizedBox(height: 24),
 
                   Text(
-                    'Welcome Back!',
+                    AppLocalizations.of(context)!.loginTitle,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -77,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Please sign in to continue',
+                    AppLocalizations.of(context)!.loginSubtitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -88,8 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'you@example.com',
+                      labelText: AppLocalizations.of(context)!.loginEmailLabel,
+                      hintText: AppLocalizations.of(context)!.loginEmailHint,
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder( // Added border
                         borderRadius: BorderRadius.circular(8.0),
@@ -99,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null ||
                           value.isEmpty ||
                           !value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return AppLocalizations.of(context)!.loginEmailError;
                       }
                       return null;
                     },
@@ -108,8 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Enter your password',
+                      labelText: AppLocalizations.of(context)!.loginPasswordLabel,
+                      hintText: AppLocalizations.of(context)!.loginPasswordHint,
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: OutlineInputBorder( // Added border
                         borderRadius: BorderRadius.circular(8.0),
@@ -119,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return AppLocalizations.of(context)!.loginPasswordError;
                       }
                       return null;
                     },
@@ -132,10 +134,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         // TODO: Implement Forgot Password functionality
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Forgot Password clicked!')),
+                          SnackBar(
+                            content: Text(AppLocalizations.of(context)!.loginForgotPasswordClicked),
+                            ),
                         );
                       },
-                      child: const Text('Forgot Password?'),
+                      child: Text(AppLocalizations.of(context)!.loginForgotPassword),
                     ),
                   ),
                   const SizedBox(height: 24), // Increased spacing
@@ -160,14 +164,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         )
                     ),
                     onPressed: _login,
-                    child: const Text('Login'),
+                    child: Text(AppLocalizations.of(context)!.loginButton),
                   ),
                   const SizedBox(height: 16),
                   Row( // For "Don't have an account? Sign Up"
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Don\'t have an account?',
+                        AppLocalizations.of(context)!.loginNoAccount,
                         style: theme.textTheme.bodyMedium,
                       ),
                       TextButton(
@@ -176,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (context) => const SignUpScreen(),
                           ));
                         },
-                        child: const Text('Sign Up', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text(AppLocalizations.of(context)!.loginSignUpLink, style: const TextStyle(fontWeight: FontWeight.bold),),
                       ),
                     ],
                   ),

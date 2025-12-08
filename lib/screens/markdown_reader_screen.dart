@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
 class MarkdownHomePage extends StatefulWidget {
   final String markdownUrl;
   final String lessonTitle;
@@ -38,7 +40,7 @@ class _MarkdownHomePageState extends State<MarkdownHomePage> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Не удалось загрузить документ';
+        _error = AppLocalizations.of(context)!.markdownLoadError;
         _isLoading = false;
       });
     }
@@ -70,7 +72,7 @@ class _MarkdownHomePageState extends State<MarkdownHomePage> {
             ? const Center(child: CircularProgressIndicator())
             : _mdContent.isNotEmpty
                 ? TocWidget(controller: _tocController)
-                : const Center(child: Text('Оглавление недоступно')),
+                : Center(child: Text(AppLocalizations.of(context)!.markdownTocUnavailable)),
         ),
       ),
 

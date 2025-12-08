@@ -12,6 +12,9 @@ import 'package:course/widgets/course_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
+
 // Debouncer class
 class Debouncer {
   final int milliseconds;
@@ -181,7 +184,7 @@ class _MainScreenState extends State<MainScreen> {
       focusNode: _searchFocusNode,
       autofocus: true,
       decoration: InputDecoration(
-        hintText: 'Search courses...',
+        hintText: AppLocalizations.of(context)!.homeSearchHint,
         border: InputBorder.none,
         hintStyle: TextStyle(
           color: Theme.of(context).hintColor.withAlpha((252 * 0.8).toInt()),
@@ -201,7 +204,7 @@ class _MainScreenState extends State<MainScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _stopSearch,
-          tooltip: "Close Search",
+          tooltip: AppLocalizations.of(context)!.homeSearchCloseTooltip,
         ),
         title: _buildSearchField(),
         actions: [
@@ -221,12 +224,12 @@ class _MainScreenState extends State<MainScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            tooltip: "Search Courses",
+            tooltip: AppLocalizations.of(context)!.homeSearchTooltip,
             onPressed: _startSearch,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: "Settings",
+            tooltip: AppLocalizations.of(context)!.homeSettingsTooltip,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -279,7 +282,7 @@ class _MainScreenState extends State<MainScreen> {
                   );
                 }
               },
-              label: const Text('Sample Data'), 
+              label: Text(AppLocalizations.of(context)!.homeSampleDataLabel),
               icon: const Icon(Icons.data_exploration_outlined),
             ),
     );
@@ -294,8 +297,8 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     if (_allCourses.isEmpty && !_isLoadingCourses) {
-      return const Center(
-        child: Text('No courses available. Try adding sample data.'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.homeNoCourses),
       );
     }
 
@@ -307,12 +310,12 @@ class _MainScreenState extends State<MainScreen> {
             const Icon(Icons.search_off_rounded, size: 60, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              'No courses found for "$_searchQuery".',
+              AppLocalizations.of(context)!.homeNoCoursesForQuery(_searchQuery),
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
-              'Try a different search term.',
+              AppLocalizations.of(context)!.homeTryDifferentTerm,
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
@@ -417,14 +420,14 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Прогресс обучения',
+                      AppLocalizations.of(context)!.homeLearningProgressTitle,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const Spacer(),
                     Text(
-                      '$innerProgress дн. стрика',
+                      AppLocalizations.of(context)!.homeInnerProgressLabel(innerProgress),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.primary,
@@ -467,7 +470,7 @@ class _MainScreenState extends State<MainScreen> {
                         const Icon(Icons.star, size: 20, color: Colors.green),
                         const SizedBox(width: 4),
                         Text(
-                          "Очки за сегодня",
+                          AppLocalizations.of(context)!.homeTodayPoints,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -481,7 +484,7 @@ class _MainScreenState extends State<MainScreen> {
                             size: 20, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
-                          "Дни стрика",
+                          AppLocalizations.of(context)!.homeStreakDays,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -497,14 +500,14 @@ class _MainScreenState extends State<MainScreen> {
                   alignment: Alignment.center,
                   child: Text(
                     ((outerTarget >= 1)
-                    ? 'Поздравляем, ты выполнил план учёбы!🎉'
+                    ? AppLocalizations.of(context)!.homeStatusDone
                     : (outerTarget >= 0.8
-                    ? 'Вы почти достигли цели 👍'
+                    ? AppLocalizations.of(context)!.homeStatusAlmost
                     : ((outerTarget >= 0.6 && outerTarget < 0.8)
-                    ? 'Еще пару уроков 👾'
+                    ? AppLocalizations.of(context)!.homeStatusFewLessons
                     : ((outerTarget > 0 && outerTarget < 0.6)
-                    ? 'Хорошое начало 🤠'
-                    : 'Пора начать 😸'
+                    ? AppLocalizations.of(context)!.homeStatusGoodStart
+                    : AppLocalizations.of(context)!.homeStatusStart
                     )))),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
