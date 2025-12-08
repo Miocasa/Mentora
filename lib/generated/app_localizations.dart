@@ -689,31 +689,31 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAboutAppSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Version 1.0.0'**
-  String get settingsAboutAppSubtitle;
+  /// **'Version {reason}'**
+  String settingsAboutAppSubtitle(String reason);
 
   /// No description provided for @settingsAboutAppName.
   ///
   /// In en, this message translates to:
-  /// **'Course App'**
+  /// **'TeckOqu'**
   String get settingsAboutAppName;
 
   /// No description provided for @settingsAboutAppVersion.
   ///
   /// In en, this message translates to:
-  /// **'1.0.0'**
+  /// **'1.0.2'**
   String get settingsAboutAppVersion;
 
   /// No description provided for @settingsAboutAppLegalese.
   ///
   /// In en, this message translates to:
-  /// **'© {year} Your Company Name'**
+  /// **'© {year} MioSpace'**
   String settingsAboutAppLegalese(int year);
 
   /// No description provided for @settingsAboutAppDescription.
   ///
   /// In en, this message translates to:
-  /// **'This is a great course application built with Flutter and Firebase.'**
+  /// **'This is a great course application built with Flutter and accessible for everyone.'**
   String get settingsAboutAppDescription;
 
   /// No description provided for @settingsLogoutFailedWithReason.

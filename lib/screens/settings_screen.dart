@@ -203,13 +203,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: const Icon(Icons.info_outline),
               title: Text(AppLocalizations.of(context)!.settingsAboutAppTitle, style: textTheme.titleMedium),
-              subtitle: Text(AppLocalizations.of(context)!.settingsAboutAppSubtitle, style: textTheme.bodyMedium),
+              subtitle: Text(AppLocalizations.of(context)!.settingsAboutAppSubtitle(AppLocalizations.of(context)!.settingsAboutAppVersion), style: textTheme.bodyMedium),
               onTap: () {
                 showAboutDialog(
                   context: context,
                   applicationName: AppLocalizations.of(context)!.settingsAboutAppName,
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: '© ${DateTime.now().year} Your Company Name',
+                  applicationVersion: AppLocalizations.of(context)!.settingsAboutAppVersion,
+                  applicationLegalese: AppLocalizations.of(context)!.settingsAboutAppLegalese(DateTime.now().year.toInt()),
                   applicationIcon: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Icon(Icons.school, size: 40, color: colorScheme.primary),

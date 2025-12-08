@@ -57,7 +57,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         final String name = profile.name;
         final String email = profile.email;
         final String role = profile.role;
-        final int streak = profile.streak;
+        final int streak = profile.streakDays;
 
         return _buildProfileView(
           context,
