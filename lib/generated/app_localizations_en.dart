@@ -326,22 +326,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutAppTitle => 'About App';
 
   @override
-  String get settingsAboutAppSubtitle => 'Version 1.0.0';
+  String settingsAboutAppSubtitle(String reason) {
+    return 'Version $reason';
+  }
 
   @override
-  String get settingsAboutAppName => 'Course App';
+  String get settingsAboutAppName => 'TeckOqu';
 
   @override
-  String get settingsAboutAppVersion => '1.0.0';
+  String get settingsAboutAppVersion => '1.0.2';
 
   @override
   String settingsAboutAppLegalese(int year) {
-    return '© $year Your Company Name';
+    return '© $year MioSpace';
   }
 
   @override
   String get settingsAboutAppDescription =>
-      'This is a great course application built with Flutter and Firebase.';
+      'This is a great course application built with Flutter and accessible for everyone.';
 
   @override
   String settingsLogoutFailedWithReason(String reason) {

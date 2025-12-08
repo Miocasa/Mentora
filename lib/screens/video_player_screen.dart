@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
   final String lessonTitle;
@@ -65,7 +67,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         debugPrint("Error initializing video player: $error");
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading video: $error')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.videoErrorLoading(error))),
         );
       });
     }
@@ -137,10 +139,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   /// Плеер для обычных сетевых видео (MP4/HLS и т.п.)
   Widget _buildNativePlayer() {
     if (_videoController == null) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(16.0),
         child: Text(
-          'Видео URL не задан или не поддерживается.',
+          AppLocalizations.of(context)!.videoUrlNotSupported,
           style: TextStyle(color: Colors.white),
           textAlign: TextAlign.center,
         ),
@@ -167,7 +169,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 const Icon(Icons.error, color: Colors.red, size: 40),
                 const SizedBox(height: 12),
                 Text(
-                  'Не удалось загрузить видео.',
+                  AppLocalizations.of(context)!.videoLoadFailed,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium

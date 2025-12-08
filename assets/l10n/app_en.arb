@@ -45,6 +45,9 @@
   "signUpFailed": "Sign up failed. Please try again or use a different email.",
   "signUpSuccess": "Account created successfully! Please log in.",
 
+
+
+
   "homeSearchHint": "Search courses...",
   "homeSearchCloseTooltip": "Close Search",
   "homeSearchClearTooltip": "Clear Search",
@@ -85,6 +88,9 @@
   "homeStatusFewLessons": "Just a few more lessons 👾",
   "homeStatusGoodStart": "Good start 🤠",
   "homeStatusStart": "Time to start 😸",
+
+
+  
 
   "myCoursesLoginToSee": "Please log in to see your courses.",
   "myCoursesErrorWithReason": "Error: {reason}",
@@ -166,10 +172,19 @@
   "settingsAccountSection": "Account",
   "settingsAboutSection": "About",
   "settingsAboutAppTitle": "About App",
-  "settingsAboutAppSubtitle": "Version 1.0.0",
-  "settingsAboutAppName": "Course App",
-  "settingsAboutAppVersion": "1.0.0",
-  "settingsAboutAppLegalese": "© {year} Your Company Name",
+  
+  "settingsAboutAppSubtitle": "Version {reason}",
+  "@settingsAboutAppSubtitle": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+
+  "settingsAboutAppName": "TeckOqu",
+  "settingsAboutAppVersion": "1.0.2",
+  "settingsAboutAppLegalese": "© {year} MioSpace",
   "@settingsAboutAppLegalese": {
     "placeholders": {
       "year": {
@@ -177,7 +192,7 @@
       }
     }
   },
-  "settingsAboutAppDescription": "This is a great course application built with Flutter and Firebase.",
+  "settingsAboutAppDescription": "This is a great course application built with Flutter and accessible for everyone.",
   "settingsLogoutFailedWithReason": "Logout failed: {reason}",
   "@settingsLogoutFailedWithReason": {
     "placeholders": {

@@ -318,8 +318,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsPrimaryColorSection => 'Основной цвет';
 
   @override
-  String get settingsPrimaryColorHint =>
-      'Выберите предпочитаемый цвет приложения:';
+  String get settingsPrimaryColorHint => 'Предпочитаемый цвет интерфейса:';
 
   @override
   String get settingsAccountSection => 'Аккаунт';
@@ -331,22 +330,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsAboutAppTitle => 'О приложении';
 
   @override
-  String get settingsAboutAppSubtitle => 'Версия 1.0.0';
+  String settingsAboutAppSubtitle(String reason) {
+    return 'Версия $reason';
+  }
 
   @override
-  String get settingsAboutAppName => 'Course App';
+  String get settingsAboutAppName => 'TeckOqu';
 
   @override
-  String get settingsAboutAppVersion => '1.0.0';
+  String get settingsAboutAppVersion => '1.0.2';
 
   @override
   String settingsAboutAppLegalese(int year) {
-    return '© $year Ваша компания';
+    return '© $year MioSpace';
   }
 
   @override
   String get settingsAboutAppDescription =>
-      'Это отличное приложение для курсов, созданное на Flutter и Firebase.';
+      'Это отличное приложение для курсов, созданное на Flutter и доступное всем.';
 
   @override
   String settingsLogoutFailedWithReason(String reason) {

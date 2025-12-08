@@ -12,21 +12,26 @@ import 'package:course/widgets/course_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// Debouncer class
+import 'package:course/generated/app_localizations.dart';
+
+/// Debouncer class
 class Debouncer {
   final int milliseconds;
   Timer? _timer;
   Debouncer({required this.milliseconds});
 
-  run(VoidCallback action) {
+  void run(VoidCallback action) {
     _timer?.cancel();
     _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 
-  dispose() {
+  void dispose() {
     _timer?.cancel();
   }
 }
+
+// тип для функции получения локализованной подписи
+typedef LabelBuilder = String Function(AppLocalizations l10n);
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -50,10 +55,27 @@ class _MainScreenState extends State<MainScreen> {
   bool _isLoadingCourses = true;
   bool _isSearching = false;
 
-  final List<({IconData icon, IconData selectedIcon, String label})> _destinations = [
-    (icon: Icons.home_outlined,   selectedIcon: Icons.home,        label: 'Главная'),
-    (icon: Icons.favorite_border, selectedIcon: Icons.favorite,    label: 'Мои курсы'),
-    (icon: Icons.person_outline,  selectedIcon: Icons.person,      label: 'Профиль'),
+  // пункты нижней навигации — без context, используем функцию label(l10n)
+  final List<({
+    IconData icon,
+    IconData selectedIcon,
+    LabelBuilder label
+  })> _destinations = [
+    (
+      icon: Icons.home_outlined,
+      selectedIcon: Icons.home,
+      label: (l10n) => l10n.tabHome,
+    ),
+    (
+      icon: Icons.favorite_border,
+      selectedIcon: Icons.favorite,
+      label: (l10n) => l10n.tabMyCourses,
+    ),
+    (
+      icon: Icons.person_outline,
+      selectedIcon: Icons.person,
+      label: (l10n) => l10n.tabProfile,
+    ),
   ];
 
   int _selectedIndex = 0;
@@ -102,19 +124,20 @@ class _MainScreenState extends State<MainScreen> {
   // === подписка на мои курсы с прогрессом ===
   void _listenToEnrollments() {
     if (_authService.currentUser != null) {
-      _enrollmentSubscription = _firestoreService
-          .getMyCoursesWithProgress()
-          .listen((myCourseInfoList) {
-        if (mounted) {
-          Map<String, EnrollmentDetails> tempMap = {};
-          for (var info in myCourseInfoList) {
-            tempMap[info.course.id] = info.enrollmentDetails;
+      _enrollmentSubscription =
+          _firestoreService.getMyCoursesWithProgress().listen(
+        (myCourseInfoList) {
+          if (mounted) {
+            final Map<String, EnrollmentDetails> tempMap = {};
+            for (var info in myCourseInfoList) {
+              tempMap[info.course.id] = info.enrollmentDetails;
+            }
+            setState(() {
+              _enrolledDetailsMap = tempMap;
+            });
           }
-          setState(() {
-            _enrolledDetailsMap = tempMap;
-          });
-        }
-      });
+        },
+      );
     } else {
       if (mounted && _enrolledDetailsMap.isNotEmpty) {
         setState(() {
@@ -176,12 +199,14 @@ class _MainScreenState extends State<MainScreen> {
 
   // === UI поиска в AppBar ===
   Widget _buildSearchField() {
+    final l10n = AppLocalizations.of(context)!;
+
     return TextField(
       controller: _searchController,
       focusNode: _searchFocusNode,
       autofocus: true,
       decoration: InputDecoration(
-        hintText: 'Search courses...',
+        hintText: l10n.homeSearchHint,
         border: InputBorder.none,
         hintStyle: TextStyle(
           color: Theme.of(context).hintColor.withAlpha((252 * 0.8).toInt()),
@@ -196,19 +221,21 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   AppBar _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isSearching) {
       return AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _stopSearch,
-          tooltip: "Close Search",
+          tooltip: l10n.homeSearchCloseTooltip,
         ),
         title: _buildSearchField(),
         actions: [
           if (_searchQuery.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear),
-              tooltip: "Clear Search",
+              tooltip: l10n.homeSearchClearTooltip,
               onPressed: () {
                 _searchController.clear();
               },
@@ -217,16 +244,16 @@ class _MainScreenState extends State<MainScreen> {
       );
     } else {
       return AppBar(
-        title: const Text('e-learn'),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            tooltip: "Search Courses",
+            tooltip: l10n.homeSearchTooltip,
             onPressed: _startSearch,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: "Settings",
+            tooltip: l10n.homeSettingsTooltip,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -239,16 +266,21 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     debugPrint(
-        "--- MainScreen BUILD METHOD CALLED --- (Query: $_searchQuery, IsSearching: $_isSearching)");
+      "--- MainScreen BUILD METHOD CALLED --- "
+      "(Query: $_searchQuery, IsSearching: $_isSearching)",
+    );
+
     return Scaffold(
       appBar: _buildAppBar(context),
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          Builder(builder: (_) => _buildStore()),              // главная
-          const MyCoursesScreen(),                             // мои курсы
-          const UserProfileScreen(),                           // профиль
+          Builder(builder: (_) => _buildStore()), // главная
+          const MyCoursesScreen(), // мои курсы
+          const UserProfileScreen(), // профиль
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -258,35 +290,42 @@ class _MainScreenState extends State<MainScreen> {
         },
         height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        destinations: _destinations.map((dest) {
-          return NavigationDestination(
-            icon: Icon(dest.icon),
-            selectedIcon: Icon(dest.selectedIcon),
-            label: dest.label,
-          );
-        }).toList(),
+        destinations: _destinations
+            .map(
+              (dest) => NavigationDestination(
+                icon: Icon(dest.icon),
+                selectedIcon: Icon(dest.selectedIcon),
+                label: dest.label(l10n), // локализованный текст
+              ),
+            )
+            .toList(),
       ),
-      
-      floatingActionButton: (kReleaseMode || _isSearching || _selectedIndex != 0)
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () async {
-                await _firestoreService.addSampleCoursesWithLessons();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Attempted to add/update sample courses.')),
-                  );
-                }
-              },
-              label: const Text('Sample Data'), 
-              icon: const Icon(Icons.data_exploration_outlined),
-            ),
+      floatingActionButton:
+          (kReleaseMode || _isSearching || _selectedIndex != 0)
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: () async {
+                    await _firestoreService.addSampleCoursesWithLessons();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n.homeSampleDataLabel,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  label: Text(l10n.homeSampleDataLabel),
+                  icon: const Icon(Icons.data_exploration_outlined),
+                ),
     );
   }
 
   // === главный экран / витрина курсов + стрик ===
   Widget _buildStore() {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isLoadingCourses) {
       return const Center(
         child: CircularProgressIndicator(key: Key("all_courses_loading")),
@@ -294,8 +333,8 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     if (_allCourses.isEmpty && !_isLoadingCourses) {
-      return const Center(
-        child: Text('No courses available. Try adding sample data.'),
+      return Center(
+        child: Text(l10n.homeNoCourses),
       );
     }
 
@@ -307,12 +346,12 @@ class _MainScreenState extends State<MainScreen> {
             const Icon(Icons.search_off_rounded, size: 60, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              'No courses found for "$_searchQuery".',
+              l10n.homeNoCoursesForQuery(_searchQuery),
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
-              'Try a different search term.',
+              l10n.homeTryDifferentTerm,
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
@@ -357,6 +396,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildStreakCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final user = _authService.currentUser;
@@ -386,11 +426,11 @@ class _MainScreenState extends State<MainScreen> {
         final profile = snapshot.data!;
         // ✅ streak = очки (наружнее кольцо)
         // ✅ streakDays = дни стрика (внутреннее кольцо)
-        final int outerProgress = profile.streak;       // очки за сегодня
-        final int innerProgress = profile.streakDays;   // дни стрика
+        final int outerProgress = profile.streak; // очки за сегодня
+        final int innerProgress = profile.streakDays; // дни стрика
 
         const int outerGoal = 50; // цель очков за день
-        const int innerGoal = 7;  // цель стрика (7 дней подряд)
+        const int innerGoal = 7; // цель стрика (7 дней подряд)
 
         final double outerTarget =
             (outerProgress / outerGoal).clamp(0.0, 1.0) * 10;
@@ -417,14 +457,14 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Прогресс обучения',
+                      l10n.homeLearningProgressTitle,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const Spacer(),
                     Text(
-                      '$innerProgress дн. стрика',
+                      l10n.homeInnerProgressLabel(innerProgress),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.primary,
@@ -446,8 +486,8 @@ class _MainScreenState extends State<MainScreen> {
                       // 🔹 Внутреннее — дни стрика
                       innerProgress: innerTarget * t,
                       // подписи
-                      label: '${outerProgress * 10}',                     // крупная цифра — очки
-                      subLabel: 'Дней стрика: $innerProgress',     // подпись — дни стрика
+                      label: '${outerProgress * 10}',
+                      subLabel: l10n.homeInnerProgressLabel(innerProgress),
                       size: 220,
                       strokeWidth: 16,
                       innerStrokeWidth: 14,
@@ -467,7 +507,7 @@ class _MainScreenState extends State<MainScreen> {
                         const Icon(Icons.star, size: 20, color: Colors.green),
                         const SizedBox(width: 4),
                         Text(
-                          "Очки за сегодня",
+                          l10n.homeTodayPoints,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -481,7 +521,7 @@ class _MainScreenState extends State<MainScreen> {
                             size: 20, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
-                          "Дни стрика",
+                          l10n.homeStreakDays,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -492,27 +532,26 @@ class _MainScreenState extends State<MainScreen> {
                   ],
                 ),
 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    ((outerTarget >= 1)
-                    ? 'Поздравляем, ты выполнил план учёбы!🎉'
-                    : (outerTarget >= 0.8
-                    ? 'Вы почти достигли цели 👍'
-                    : ((outerTarget >= 0.6 && outerTarget < 0.8)
-                    ? 'Еще пару уроков 👾'
-                    : ((outerTarget > 0 && outerTarget < 0.6)
-                    ? 'Хорошое начало 🤠'
-                    : 'Пора начать 😸'
-                    )))),
+                    outerTarget >= 1
+                        ? l10n.homeStatusDone
+                        : (outerTarget >= 0.8
+                            ? l10n.homeStatusAlmost
+                            : (outerTarget >= 0.6
+                                ? l10n.homeStatusFewLessons
+                                : (outerTarget > 0
+                                    ? l10n.homeStatusGoodStart
+                                    : l10n.homeStatusStart))),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                       fontSize: 16,
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
               ],
             ),
           ),

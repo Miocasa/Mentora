@@ -3,6 +3,8 @@ import 'package:course/services/firestore_service.dart'; // For EnrollmentDetail
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart'; // If you want a progress bar
 
+import 'package:course/generated/app_localizations.dart';
+
 class CourseCard extends StatelessWidget {
   final Course course;
   final VoidCallback onTap;
@@ -116,7 +118,7 @@ class CourseCard extends StatelessWidget {
                             animationDuration: 500,
                             percent: progressPercent > 1.0 ? 1.0 : progressPercent, // Cap at 100%
                             center: Text(
-                              isCompleted ? "Completed" : "${(progressPercent * 100).toStringAsFixed(0)}%",
+                              isCompleted ? AppLocalizations.of(context)!.courseCardCompleted : "${(progressPercent * 100).toStringAsFixed(0)}%",
                               style: TextStyle(
                                   fontSize: progressPercent > 0.1 || isCompleted ? 7.0 : 0, // Hide if too small and not completed
                                   color: Theme.of(context).colorScheme.onPrimary,
@@ -136,7 +138,7 @@ class CourseCard extends StatelessWidget {
                     )
                   else // Not enrolled, maybe show a "View Course" or nothing
                     Text(
-                      "Tap to view details",
+                      AppLocalizations.of(context)!.courseCardTapForDetails,
                       style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
                     ),
                 ],

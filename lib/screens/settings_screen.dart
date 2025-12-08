@@ -3,6 +3,8 @@ import 'package:course/services/auth_service.dart'; // Import AuthService
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:course/generated/app_localizations.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -17,11 +19,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Confirm Logout'),
-          content: const Text('Are you sure you want to log out?'),
+          title: Text(AppLocalizations.of(context)!.settingsConfirmLogoutTitle),
+          content: Text(AppLocalizations.of(context)!.settingsConfirmLogoutBody),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.settingsCancel),
               onPressed: () {
                 Navigator.of(dialogContext).pop(false); // Return false
               },
@@ -30,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error, // Make it red or distinct
               ),
-              child: const Text('Log Out'),
+              child: Text(AppLocalizations.of(context)!.settingsLogout),
               onPressed: () {
                 Navigator.of(dialogContext).pop(true); // Return true
               },
@@ -50,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context)!.settingsTitle),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
@@ -64,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 children: [
                   RadioListTile<ThemeMode>(
-                    title: Text('Light Mode', style: textTheme.titleMedium),
+                    title: Text(AppLocalizations.of(context)!.settingsLightMode, style: textTheme.titleMedium,),
                     value: ThemeMode.light,
                     groupValue: themeProvider.themeMode,
                     onChanged: (ThemeMode? value) {
@@ -73,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     secondary: const Icon(Icons.light_mode_outlined),
                   ),
                   RadioListTile<ThemeMode>(
-                    title: Text('Dark Mode', style: textTheme.titleMedium),
+                    title: Text(AppLocalizations.of(context)!.settingsDarkMode, style: textTheme.titleMedium,),
                     value: ThemeMode.dark,
                     groupValue: themeProvider.themeMode,
                     onChanged: (ThemeMode? value) {
@@ -82,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     secondary: const Icon(Icons.dark_mode_outlined),
                   ),
                   RadioListTile<ThemeMode>(
-                    title: Text('System Default', style: textTheme.titleMedium),
+                    title: Text(AppLocalizations.of(context)!.settingsSystemMode, style: textTheme.titleMedium,),
                     value: ThemeMode.system,
                     groupValue: themeProvider.themeMode,
                     onChanged: (ThemeMode? value) {
@@ -97,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24.0),
 
           // --- Primary Color Section ---
-          _buildSectionTitle(context, 'Primary Color'),
+          _buildSectionTitle(context, AppLocalizations.of(context)!.settingsPrimaryColorSection,),
           Card(
             // ... (existing primary color selection Wrap) ...
             child: Padding(
@@ -106,7 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Select your preferred app color:',
+                    AppLocalizations.of(context)!.settingsPrimaryColorHint,
                     style: textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16.0),
@@ -156,16 +158,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24.0),
 
           // --- Account Section ---
-          _buildSectionTitle(context, 'Account'),
+          _buildSectionTitle(context, AppLocalizations.of(context)!.settingsAccountSection),
           Card(
             child: ListTile(
               leading: Icon(Icons.logout, color: colorScheme.error), // Distinct color for logout
               title: Text(
-                'Log Out',
+                AppLocalizations.of(context)!.settingsLogout,
                 style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.error, // Make text color match icon
-                ),
-              ),
+                color: colorScheme.error, 
+              ), 
+            ),
+
 // ... inside SettingsScreen
               onTap: () async {
                 final confirmLogout = await _showLogoutConfirmationDialog(context);
@@ -180,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   } catch (e) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Logout failed: $e")),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.settingsLogoutFailedWithReason(e.toString())))
                       );
                     }
                   }
@@ -194,27 +197,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
           // --- About Section ---
-          _buildSectionTitle(context, 'About'),
+         _buildSectionTitle(context, AppLocalizations.of(context)!.settingsAboutSection),
           Card(
             // ... (existing About ListTile) ...
             child: ListTile(
               leading: const Icon(Icons.info_outline),
-              title: Text('About App', style: textTheme.titleMedium),
-              subtitle: const Text('Version 1.0.0'),
+              title: Text(AppLocalizations.of(context)!.settingsAboutAppTitle, style: textTheme.titleMedium),
+              subtitle: Text(AppLocalizations.of(context)!.settingsAboutAppSubtitle(AppLocalizations.of(context)!.settingsAboutAppVersion), style: textTheme.bodyMedium),
               onTap: () {
                 showAboutDialog(
                   context: context,
-                  applicationName: 'Course App',
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: '© ${DateTime.now().year} Your Company Name',
+                  applicationName: AppLocalizations.of(context)!.settingsAboutAppName,
+                  applicationVersion: AppLocalizations.of(context)!.settingsAboutAppVersion,
+                  applicationLegalese: AppLocalizations.of(context)!.settingsAboutAppLegalese(DateTime.now().year.toInt()),
                   applicationIcon: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Icon(Icons.school, size: 40, color: colorScheme.primary),
                   ),
                   children: <Widget>[
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(top: 15),
-                      child: Text('This is a great course application built with Flutter and Firebase.'),
+                      child: Text(AppLocalizations.of(context)!.settingsAboutAppDescription),
                     )
                   ],
                 );

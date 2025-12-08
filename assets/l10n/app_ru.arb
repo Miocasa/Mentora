@@ -153,14 +153,22 @@
   "settingsDarkMode": "Тёмная тема",
   "settingsSystemMode": "Системная тема",
   "settingsPrimaryColorSection": "Основной цвет",
-  "settingsPrimaryColorHint": "Выберите предпочитаемый цвет приложения:",
+  "settingsPrimaryColorHint": "Предпочитаемый цвет интерфейса:",
   "settingsAccountSection": "Аккаунт",
   "settingsAboutSection": "О приложении",
   "settingsAboutAppTitle": "О приложении",
-  "settingsAboutAppSubtitle": "Версия 1.0.0",
-  "settingsAboutAppName": "Course App",
-  "settingsAboutAppVersion": "1.0.0",
-  "settingsAboutAppLegalese": "© {year} Ваша компания",
+
+  "settingsAboutAppSubtitle": "Версия {reason}",
+  "@settingsAboutAppSubtitle": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAboutAppName": "TeckOqu",
+  "settingsAboutAppVersion": "1.0.2",
+  "settingsAboutAppLegalese": "© {year} MioSpace",
   "@settingsAboutAppLegalese": {
     "placeholders": {
       "year": {
@@ -168,7 +176,8 @@
       }
     }
   },
-  "settingsAboutAppDescription": "Это отличное приложение для курсов, созданное на Flutter и Firebase.",
+  
+  "settingsAboutAppDescription": "Это отличное приложение для курсов, созданное на Flutter и доступное всем.",
   "settingsLogoutFailedWithReason": "Не удалось выйти: {reason}",
   "@settingsLogoutFailedWithReason": {
     "placeholders": {
