@@ -1,35 +1,38 @@
-import 'package:course/generated/app_localizations.dart';
-import 'package:course/providers/theme_provider.dart';
-import 'package:course/screens/auth_gate.dart';
-import 'package:course/services/auth_service.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-// ЛОКАЛИЗАЦИЯ
-import 'package:flutter_localizations/flutter_localizations.dart';
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:course/providers/theme_provider.dart';
+import 'package:course/services/auth_service.dart';
+import 'package:course/screens/auth_gate.dart';
 
-void main() async {
+// Локализация
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:course/generated/app_localizations.dart';
+
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ВАЖНО: на Web обязательно через options: DefaultFirebaseOptions.currentPlatform
   await Firebase.initializeApp(
-    // options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform,
   );
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        Provider<AuthService>(create: (_) => AuthService()),
+        Provider(create: (_) => AuthService()),
       ],
-      child: const CourseAppRoot(),
+      child: const MyApp(),
     ),
   );
 }
 
-class CourseAppRoot extends StatelessWidget {
-  const CourseAppRoot({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,21 +41,14 @@ class CourseAppRoot extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      /// Заголовок приложения из локализации (ключ appTitle в app_*.arb)
-      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-
-      /// Делегаты локализации — БЕЗ них AppLocalizations.of(context) будет null
+      // Локализация
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-
-      /// Список поддерживаемых языков
       supportedLocales: AppLocalizations.supportedLocales,
-      // Если хочешь зафиксировать язык:
-      // locale: const Locale('ru'),
 
       themeMode: themeProvider.themeMode,
       theme: themeProvider.currentLightTheme,

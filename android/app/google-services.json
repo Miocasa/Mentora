@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "540952718446",
+    "firebase_url": "https://device-streaming-b7af43e8-default-rtdb.firebaseio.com",
     "project_id": "device-streaming-b7af43e8",
     "storage_bucket": "device-streaming-b7af43e8.firebasestorage.app"
   },
