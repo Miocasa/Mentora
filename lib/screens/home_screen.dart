@@ -366,9 +366,13 @@ class _MainScreenState extends State<MainScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       itemCount: _filteredCourses.length + 1,
       itemBuilder: (context, index) {
-        if (index == 0) {
+        if (index == 0 ) {
           // карточка стрика в начале списка
-          return _buildStreakCard(context);
+          if(!_isSearching) {
+            return _buildStreakCard(context);
+          } else {
+            return Card();
+          }
         }
 
         final course = _filteredCourses[index - 1];
