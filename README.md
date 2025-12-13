@@ -55,7 +55,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 
 ## ✨ Author
-👩‍💻 Done by Miocasa   
+👩‍💻 Done by Miocasa  
+🌐 Localization made by [https://github.com/xredworm]("xredworm")   
 🌳 Fork from [e-learn]("https://github.com/mrxyz606/e-learn"), made by [mrxyz606]("https://github.com/mrxyz606")   
 📧 Contact: [narimanabdualiev06@gmail.com](mailto:narimanabdualiev06@gmail.com)  
 🔗 GitHub: [Miocasa](https://github.com/Miocasa)  
